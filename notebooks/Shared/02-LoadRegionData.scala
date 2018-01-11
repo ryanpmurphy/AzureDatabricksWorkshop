@@ -1,8 +1,8 @@
 // Databricks notebook source
 //Storage account configuration
-spark.conf.set(
-  "fs.azure.account.key.demorgsa.blob.core.windows.net",
-  "vp9XbsXu4dHfT5x/BGRKe0k88I/pIy0Zr0XYpg+NUMsEXWzAMWIWjoF5wuafVsckkEmpgzJob3iaD2P9T++Zcw==")
+//spark.conf.set(
+//  "fs.azure.account.key.demorgsa.blob.core.windows.net",
+//  "vp9XbsXu4dHfT5x/BGRKe0k88I/pIy0Zr0XYpg+NUMsEXWzAMWIWjoF5wuafVsckkEmpgzJob3iaD2P9T++Zcw==")
 
 
 // COMMAND ----------
