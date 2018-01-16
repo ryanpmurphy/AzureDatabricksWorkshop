@@ -208,15 +208,17 @@ val TripYellowSchemaPre2015 = StructType(Array(
 
 // COMMAND ----------
 
+//Set values
 val Type = "yellow"
 val Schema = TripYellowSchema2016H2
 val Year = "2016"
-val Month = "06"
+val Month = "05"
 
 val FileSizeMB = 64
 
 // COMMAND ----------
 
+//Load dataframe from source data
 val tripDF = sqlContext.read.format("csv")
   .option("header", "true")
   .schema(Schema)
@@ -226,7 +228,7 @@ val tripDF = sqlContext.read.format("csv")
 
 // COMMAND ----------
 
-// //Delete files from prior execution, if any
+//Delete files from prior execution, if any
 dbutils.fs.ls("wasbs://raw@gaiasa.blob.core.windows.net/year=" + Year + "/month=" + Month + "/type=" + Type + "/").foreach((i: FileInfo) => {
       val filename = i.path  
       val delStatus = dbutils.fs.rm(filename)
@@ -241,6 +243,7 @@ tripDF.write.mode(SaveMode.Overwrite).parquet("wasbs://raw@gaiasa.blob.core.wind
 
 // COMMAND ----------
 
+//Re-size partition files
 var totalpartfilecount : Int = 0
 var totalsize : Long = 0
 
@@ -254,8 +257,10 @@ if((totalsize / 1024 / 1024 % FileSizeMB) > 0.0) //remainder file
 {
   totalpartfilecount = (roundedpartfilecount + 1).toInt
 }
-  
-tripDF.coalesce(totalpartfilecount).write.mode(SaveMode.Overwrite).parquet("wasbs://raw@gaiasa.blob.core.windows.net/year=" + Year + "/month=" + Month + "/type=" + Type + "/")
+
+println("wasbs://raw@gaiasa.blob.core.windows.net/year=" + Year + "/month=" + Month + "/type=" + Type + "/")
+println(totalsize)
+//tripDF.coalesce(totalpartfilecount).write.mode(SaveMode.Overwrite).parquet("wasbs://raw@gaiasa.blob.core.windows.net/year=" + Year + "/month=" + Month + "/type=" + Type + "/")
 
 
 // COMMAND ----------
