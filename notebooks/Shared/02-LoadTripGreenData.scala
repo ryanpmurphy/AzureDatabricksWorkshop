@@ -210,9 +210,9 @@ val TripYellowSchemaPre2015 = StructType(Array(
 
 //Set values
 val Type = "yellow"
-val Schema = TripYellowSchema2016H2
-val Year = "2016"
-val Month = "05"
+val Schema = TripYellowSchema20152016H1
+val Year = "2015"
+val Month = "07"
 
 val FileSizeMB = 64
 
@@ -239,7 +239,7 @@ dbutils.fs.ls("wasbs://raw@gaiasa.blob.core.windows.net/year=" + Year + "/month=
 
 //Save dataframe in parquet to raw storage directory
 tripDF.write.mode(SaveMode.Overwrite).parquet("wasbs://raw@gaiasa.blob.core.windows.net/year=" + Year + "/month=" + Month + "/type=" + Type + "/")
-
+println("wasbs://raw@gaiasa.blob.core.windows.net/year=" + Year + "/month=" + Month + "/type=" + Type + "/")
 
 // COMMAND ----------
 
@@ -258,9 +258,9 @@ if((totalsize / 1024 / 1024 % FileSizeMB) > 0.0) //remainder file
   totalpartfilecount = (roundedpartfilecount + 1).toInt
 }
 
-println("wasbs://raw@gaiasa.blob.core.windows.net/year=" + Year + "/month=" + Month + "/type=" + Type + "/")
-println(totalsize)
-//tripDF.coalesce(totalpartfilecount).write.mode(SaveMode.Overwrite).parquet("wasbs://raw@gaiasa.blob.core.windows.net/year=" + Year + "/month=" + Month + "/type=" + Type + "/")
+ println("wasbs://raw@gaiasa.blob.core.windows.net/year=" + Year + "/month=" + Month + "/type=" + Type + "/")
+// println(totalsize)
+tripDF.coalesce(totalpartfilecount).write.mode(SaveMode.Overwrite).parquet("wasbs://raw@gaiasa.blob.core.windows.net/year=" + Year + "/month=" + Month + "/type=" + Type + "/")
 
 
 // COMMAND ----------
