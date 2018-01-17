@@ -12,7 +12,7 @@ import org.apache.spark.sql.types._
 // COMMAND ----------
 
 //Schema for data
-//test change 1
+//test change 1-2-3
 val TripYellowSchema = StructType(Array(
     StructField("vendorid", IntegerType, true),
     StructField("tpep_pickup_datetime", TimestampType, true),
