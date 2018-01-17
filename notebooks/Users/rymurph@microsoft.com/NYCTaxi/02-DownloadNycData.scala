@@ -4,6 +4,7 @@ displayHTML("<font name='arial'><h1>Download NYC taxi data</h1><br>1) Configure 
 
 
 
+
 // COMMAND ----------
 
 //imports
@@ -16,9 +17,9 @@ import scala.sys.process.ProcessLogger
 // 1) STORAGE CONFIGURATION
 // This is not required if storage conf is set at cluster level
 //================================================================================
-spark.conf.set(
-  "fs.azure.account.key.gaialabsa.blob.core.windows.net",
-  "bXE4JN3iQ32ANf6xtpwRxZqYZk8TlAXCXacASB84jg91TsFiz5sLEzy2v5+ThiBgfrf6qVkkbxkxGPahbEoF7Q==")
+// spark.conf.set(
+//   "fs.azure.account.key.gaialabsa.blob.core.windows.net",
+//   "bXE4JN3iQ32ANf6xtpwRxZqYZk8TlAXCXacASB84jg91TsFiz5sLEzy2v5+ThiBgfrf6qVkkbxkxGPahbEoF7Q==")
 
 
 // COMMAND ----------
