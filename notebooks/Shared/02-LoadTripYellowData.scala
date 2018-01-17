@@ -1,4 +1,8 @@
 // Databricks notebook source
+// MAGIC %md Load Yellow Taxi Data
+
+// COMMAND ----------
+
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.types.{StructType, StructField, StringType, IntegerType, TimestampType, DoubleType}
 import com.databricks.backend.daemon.dbutils.FileInfo
@@ -8,6 +12,7 @@ import org.apache.spark.sql.types._
 // COMMAND ----------
 
 //Schema for data
+//test change 1
 val TripYellowSchema = StructType(Array(
     StructField("vendorid", IntegerType, true),
     StructField("tpep_pickup_datetime", TimestampType, true),
