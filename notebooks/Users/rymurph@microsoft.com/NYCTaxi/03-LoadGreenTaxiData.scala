@@ -231,106 +231,97 @@ val minCompactedFileSizeInMB = 64
 
 // COMMAND ----------
 
+//Load Source data to Raw
+///////////////////////////////
 
-//until schema derivation is ready
-//var taxiSchema = greenTripSchema2017H1
 var taxiSchema : StructType = null
 
-for (j <- 2013 to 2017)
+for (j <- 2017 to 2017)
   {
     //Create destination partition - year
     dbutils.fs.mkdirs(destDataDirRoot + "trip_year=" + j) 
     for (i <- 1 to 12) 
     {
-      if(tripType == "green")
-        if((j == 2013 && i > 7) || (j == 2014))
-          taxiSchema = greenTripSchemaPre2015
-        else if(j == 2015 && i < 7)
-          taxiSchema = greenTripSchema2015H1
-        else if((j == 2016 && i < 7) || (j == 2015 && i > 6))
-          taxiSchema = greenTripSchema2015H22016H1
-        else if(j == 2016 && i > 6)
-          taxiSchema = greenTripSchema2016H2
-        else if(j == 2017)
-          taxiSchema = greenTripSchema2017H1
-//       else if(tripType == "yellow")
-//         if(j == 2016 && i < 7)
-//           taxiSchema = yellowTripSchema20152016H1
-//         else if(j == 2016 && i > 6)
-//           taxiSchema = yellowTripSchema2016H2
-//         else if(j == 2017)
-//           taxiSchema = yellowTripSchema2017H1
-
-
-      /*
-      //Determine schema and column listing 
-      var taxiDataSchema: org.apache.spark.sql.types.StructType  = null
-      var columnList: String = ""
-      if(j >= 2009 && j <=2014) //2009-2014 - no schema change
-        taxiDataSchema = yellowTripSchema1
-      else if(j == 2017) //Schema for 2017
-      {
-        columnList = yellowTripSchemaColList4And3
-        taxiDataSchema = yellowTripSchema4
-      }
-      else if(j == 2016 && i > 6 ) //Schema for 2016 H2
-        taxiDataSchema = yellowTripSchema3
-      else if( j == 2015 || (j == 2016 && i < 7)) //Schema for 2015 and 2016 H1
-        taxiDataSchema = yellowTripSchema2
-      */
-      
       //Source file  
       val srcDataFile=srcDataDirRoot + "year=" + j + "/month=" +  "%02d".format(i) + "/type=" + tripType + "/" + tripType + "_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
       println("srcDataFile = " + srcDataFile)
-      
-      //Calc output files to coalesce to
-      val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
-      val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
-      var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
-      if (outputFileCount == 0) outputFileCount = 1
-      println("inputDirSize = " + inputDirSize)
-      println("outputFileCount = " + outputFileCount)
-
-      //Destination file  
+      //Destination directory  
       val destDataDir = destDataDirRoot + "/trip_year=" + j + "/trip_month=" + "%02d".format(i)      
       println("destDataDir = " + destDataDir)
-      
-      //Read file using schema
-      val taxiDF = sqlContext.read.format("csv")
-                                .option("header", "true")
-                                .schema(taxiSchema)
-                                .option("delimiter",",")
-                                .option("mode", "DROPMALFORMED")
-                                .load(srcDataFile).cache()
-      
-      println("recordCount = " + taxiDF.count)
-      
-      println("====================================================================================")
-      println("Original schema")
-      println("====================================================================================")
-      taxiDF.printSchema
-      
-      //Append additional columns and write to common (but unordered) schema
-      if(tripType == "green")
-        if(j < 2015) {
+
+      //GREEN TRIPS
+      if(tripType == "green"){
+        if((j == 2013 && i > 7) || (j == 2014)){
+          //Set schema
+          taxiSchema = greenTripSchemaPre2015
+          //Calc output files to coalesce to
+          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
+          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
+          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
+          if (outputFileCount == 0) outputFileCount = 1
+          //Read file using schema
+          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+          //Add columns
           val taxiFormattedDF = taxiDF.withColumn("pulocationid", lit(""))
                     .withColumn("dolocationid", lit(""))
                     .withColumn("improvement_surcharge",lit(""))
+                    .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
+                    .withColumn("taxi_type",lit(tripType))
+          //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
         }
-        else if(j == 2015 && i < 7) {
+        else if(j == 2015 && i < 7){
+          //Set schema
+          taxiSchema = greenTripSchema2015H1
+          //Calc output files to coalesce to
+          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
+          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
+          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
+          if (outputFileCount == 0) outputFileCount = 1
+          //Read file using schema
+          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+          //Add columns
           val taxiFormattedDF = taxiDF.withColumn("pulocationid", lit(""))
                     .withColumn("dolocationid", lit(""))
+                    .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
+                    .withColumn("taxi_type",lit(tripType))
+          //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
         }
-        else if((j == 2016 && i < 7) || (j == 2015 && i > 6)) {
+        else if((j == 2016 && i < 7) || (j == 2015 && i > 6)){
+          //Set schema
+          taxiSchema = greenTripSchema2015H22016H1
+          //Calc output files to coalesce to
+          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
+          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
+          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
+          if (outputFileCount == 0) outputFileCount = 1
+          //Read file using schema
+          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+          // Add columns
           val taxiFormattedDF = taxiDF.withColumn("pulocationid", lit(""))
                     .withColumn("dolocationid", lit(""))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
+                    .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
+                    .withColumn("taxi_type",lit(tripType))
+          //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
         }
-        else if(j == 2016 && i > 6) {
+        else if(j == 2016 && i > 6){
+          //Set schema
+          taxiSchema = greenTripSchema2016H2
+          //Calc output files to coalesce to
+          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
+          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
+          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
+          if (outputFileCount == 0) outputFileCount = 1
+          //Read file using schema
+          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+          // Add columns
           val taxiFormattedDF = taxiDF.withColumn("pickup_longitude", lit(""))
                     .withColumn("pickup_latitude", lit(""))
                     .withColumn("dropoff_longitude", lit(""))
@@ -338,9 +329,20 @@ for (j <- 2013 to 2017)
                     .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+          //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
         }
-        else if(j == 2017) {
+        else if(j == 2017 && i < 7){
+          //Set schema
+          taxiSchema = greenTripSchema2017H1
+          //Calc output files to coalesce to
+          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
+          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
+          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
+          if (outputFileCount == 0) outputFileCount = 1
+          //Read file using schema
+          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+          // Add columns
           val taxiFormattedDF = taxiDF.withColumn("pickup_longitude", lit(""))
                     .withColumn("pickup_latitude", lit(""))
                     .withColumn("dropoff_longitude", lit(""))
@@ -350,55 +352,110 @@ for (j <- 2013 to 2017)
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
+          //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
         }
-//       else if(tripType == "yellow")
-//         if(j == 2016 && i < 7)
-//           taxiSchema = yellowTripSchema20152016H1
-//         else if(j == 2016 && i > 6)
-//           taxiSchema = yellowTripSchema2016H2
-//         else if(j == 2017)
-//           taxiSchema = yellowTripSchema2017H1
+      }
+
+      //YELLOW TRIPS
+      else if(tripType == "yellow"){
+        if(j > 2008 && j < 2015){
+          //Set schema
+          taxiSchema = yellowTripSchemaPre2015
+          //Calc output files to coalesce to
+          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
+          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
+          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
+          if (outputFileCount == 0) outputFileCount = 1
+          //Read file using schema
+          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+          //Add columns
+          val taxiFormattedDF = taxiDF.withColumn("pulocationid", lit(""))
+                    .withColumn("dolocationid", lit(""))
+                    .withColumn("improvement_surcharge",lit(""))
+                    .withColumn("junk1",lit(""))
+                    .withColumn("junk2",lit(""))
+                    .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
+                    .withColumn("taxi_type",lit(tripType))
+          //Write parquet output
+          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+        }
+        else if((j == 2016 && i < 7) || (j == 2015)){
+          //Set schema
+          taxiSchema = yellowTripSchema20152016H1
+          //Calc output files to coalesce to
+          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
+          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
+          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
+          if (outputFileCount == 0) outputFileCount = 1
+          //Read file using schema
+          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+          //Add columns
+          val taxiFormattedDF = taxiDF.withColumn("pulocationid", lit(""))
+                    .withColumn("dolocationid", lit(""))
+                    .withColumn("junk1",lit(""))
+                    .withColumn("junk2",lit(""))
+                    .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
+                    .withColumn("taxi_type",lit(tripType))
+          //Write parquet output
+          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+        }
+        else if(j == 2016 && i > 6){
+          //Set schema
+          taxiSchema = yellowTripSchema2016H2
+          //Calc output files to coalesce to
+          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
+          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
+          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
+          if (outputFileCount == 0) outputFileCount = 1
+          //Read file using schema
+          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+          //Add columns
+          val taxiFormattedDF = taxiDF.withColumn("pickup_longitude", lit(""))
+                    .withColumn("pickup_latitude", lit(""))
+                    .withColumn("dropoff_longitude", lit(""))
+                    .withColumn("dropoff_latitude", lit(""))
+                    .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
+                    .withColumn("taxi_type",lit(tripType))
+          //Write parquet output
+          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+        }
+        else if(j == 2017 && i < 7){
+          //Set schema
+          taxiSchema = yellowTripSchema2017H1
+          //Calc output files to coalesce to
+          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
+          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
+          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
+          if (outputFileCount == 0) outputFileCount = 1
+          //Read file using schema
+          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+          //Add columns
+          val taxiFormattedDF = taxiDF.withColumn("pickup_longitude", lit(""))
+                    .withColumn("pickup_latitude", lit(""))
+                    .withColumn("dropoff_longitude", lit(""))
+                    .withColumn("dropoff_latitude", lit(""))
+                    .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
+                    .withColumn("taxi_type",lit(tripType))
+                    .withColumn("junk1",lit(""))
+                    .withColumn("junk2",lit(""))
+          //Write parquet output
+          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+        }
+      }
 
 
-//      taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDirRoot + "/trip_year=" + j + "/trip_month=" + "%02d".format(i))
-
-//       if(j == 2017)
-//       {
-//         //Will use 2017 column order as default - so no need of dataframe.select
-//         //We will merely append here
-//         val greenTaxiFormattedDF = greenTaxiDF.withColumn("pickup_longitude", lit(""))
-//                             .withColumn("pickup_latitude", lit(""))
-//                             .withColumn("dropoff_longitude", lit(""))
-//                             .withColumn("dropoff_latitude", lit(""))
-//                             .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
-//                             .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
-//                             .withColumn("taxi_type",lit("green"))
-//                             .withColumn("junk1",lit(""))
-//                             .withColumn("junk2",lit(""))
-        
-//         println("====================================================================================")
-//         println("Final schema")
-//         println("====================================================================================")
-//         taxiFormattedDF.printSchema
-//         println("recordCount = " + taxiFormattedDF.count)
-
-//         greenTaxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDirRoot + "/trip_year=" + j + "/trip_month=" + "%02d".format(i))
-//       }
       //TODO-START....................................
       //Add other schemas here; Column list will come into play to ensure columns for all years are ordered
       //For some years, we will need multiple dataframe writes to get to the desired column ordering
       //TODO-END....................................
 
       // Delete residual files from job operation (_SUCCESS, _start*, _committed*)      
-      dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => {
-        println("File=" + i.path)
-        if (!(i.path contains "parquet"))
-        {
-            val targetFilename = i.path
-            val delStatus = dbutils.fs.rm(targetFilename)
-            println("Status of deletion of " + targetFilename + " = " + delStatus)
-        }})
+      dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
       
     } 
   }
@@ -433,7 +490,7 @@ for (j <- 2017 to 2017)
 // COMMAND ----------
 
 
-val dataDir=destDataDirRoot + "/trip_year=2016/"
+val dataDir=destDataDirRoot + "/trip_year=2017/"
 println(dataDir)
 val deleteDirStatus = dbutils.fs.rm(dataDir,recurse=true)
 println(deleteDirStatus)
