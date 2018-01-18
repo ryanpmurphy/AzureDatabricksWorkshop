@@ -11,8 +11,8 @@ import org.apache.hadoop.conf.Configuration
 //Schema for data
 val greenTripSchema2017H1 = StructType(Array(
     StructField("vendorid", IntegerType, true),
-    StructField("lpep_pickup_datetime", TimestampType, true),
-    StructField("lpep_dropoff_datetime", TimestampType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("store_and_fwd_flag", StringType, true),
     StructField("ratecodeid", IntegerType, true),
     StructField("pulocationid", IntegerType, true),
@@ -32,8 +32,8 @@ val greenTripSchema2017H1 = StructType(Array(
 
 val greenTripSchema2016H2 = StructType(Array(
     StructField("vendorid", IntegerType, true),
-    StructField("lpep_pickup_datetime", TimestampType, true),
-    StructField("lpep_dropoff_datetime", TimestampType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("store_and_fwd_flag", StringType, true),
     StructField("ratecodeid", IntegerType, true),
     StructField("pulocationid", IntegerType, true),
@@ -55,8 +55,8 @@ val greenTripSchema2016H2 = StructType(Array(
 
 val greenTripSchema2015H22016H1 = StructType(Array(
     StructField("vendorid", IntegerType, true),
-    StructField("lpep_pickup_datetime", TimestampType, true),
-    StructField("lpep_dropoff_datetime", TimestampType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("store_and_fwd_flag", StringType, true),
     StructField("ratecodeid", IntegerType, true),
     StructField("pickup_longitude", DoubleType, true),
@@ -78,8 +78,8 @@ val greenTripSchema2015H22016H1 = StructType(Array(
 
 val greenTripSchema2015H1 = StructType(Array(
     StructField("vendorid", IntegerType, true),
-    StructField("lpep_pickup_datetime", TimestampType, true),
-    StructField("lpep_dropoff_datetime", TimestampType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("store_and_fwd_flag", StringType, true),
     StructField("ratecodeid", IntegerType, true),
     StructField("pickup_longitude", DoubleType, true),
@@ -103,8 +103,8 @@ val greenTripSchema2015H1 = StructType(Array(
 
 val greenTripSchemaPre2015 = StructType(Array(
     StructField("vendorid", IntegerType, true),
-    StructField("lpep_pickup_datetime", TimestampType, true),
-    StructField("lpep_dropoff_datetime", TimestampType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("store_and_fwd_flag", StringType, true),
     StructField("ratecodeid", IntegerType, true),
     StructField("pickup_longitude", DoubleType, true),
@@ -128,8 +128,8 @@ val greenTripSchemaPre2015 = StructType(Array(
 
 val yellowTripSchema2017H1 = StructType(Array(
     StructField("vendorid", IntegerType, true),
-    StructField("tpep_pickup_datetime", TimestampType, true),
-    StructField("tpep_dropoff_datetime", TimestampType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
     StructField("ratecodeid", IntegerType, true),
@@ -147,8 +147,8 @@ val yellowTripSchema2017H1 = StructType(Array(
 
 val yellowTripSchema2016H2 = StructType(Array(
     StructField("vendorid", IntegerType, true),
-    StructField("tpep_pickup_datetime", TimestampType, true),
-    StructField("tpep_dropoff_datetime", TimestampType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
     StructField("ratecodeid", IntegerType, true),
@@ -168,8 +168,8 @@ val yellowTripSchema2016H2 = StructType(Array(
 
 val yellowTripSchema20152016H1 = StructType(Array(
     StructField("vendorid", IntegerType, true),
-    StructField("tpep_pickup_datetime", TimestampType, true),
-    StructField("tpep_dropoff_datetime", TimestampType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
     StructField("pickup_longitude", DoubleType, true),
@@ -189,8 +189,8 @@ val yellowTripSchema20152016H1 = StructType(Array(
 
 val yellowTripSchemaPre2015 = StructType(Array(
     StructField("vendorid", StringType, true),
-    StructField("tpep_pickup_datetime", TimestampType, true),
-    StructField("tpep_dropoff_datetime", TimestampType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
     StructField("pickup_longitude", DoubleType, true),
@@ -209,8 +209,8 @@ val yellowTripSchemaPre2015 = StructType(Array(
 
 // val yellowTripSchemaColList = """"VendorID","tpep_pickup_datetime","tpep_dropoff_datetime","passenger_count","trip_distance","pickup_longitude","pickup_latitude","RatecodeID","store_and_fwd_flag","dropoff_longitude","dropoff_latitude","PULocationID", "DOLocationID", "payment_type", "fare_amount","extra", "mta_tax" , "tip_amount", "tolls_amount", "improvement_surcharge", "total_amount"""
 
-
-val canonicalTripSchemaColList = """"VendorID","tpep_pickup_datetime","tpep_dropoff_datetime","passenger_count","trip_distance","pickup_longitude","pickup_latitude","RatecodeID","store_and_fwd_flag","dropoff_longitude","dropoff_latitude","PULocationID", "DOLocationID", "payment_type", "fare_amount","extra", "mta_tax" , "tip_amount", "tolls_amount", "improvement_surcharge", "total_amount"""
+//missing partition columns: trip_year, trip_month, taxi_type
+// val canonicalTripSchemaColList = """"VendorID","pickup_datetime","dropoff_datetime","passenger_count","trip_distance","pickup_longitude","pickup_latitude","RatecodeID","store_and_fwd_flag","dropoff_longitude","dropoff_latitude","PULocationID", "DOLocationID", "payment_type", "fare_amount","extra", "mta_tax" , "tip_amount", "tolls_amount", "improvement_surcharge", "total_amount"""
 
 
 
@@ -219,7 +219,7 @@ val canonicalTripSchemaColList = """"VendorID","tpep_pickup_datetime","tpep_drop
 // Variables and other parameters
 
 // Taxi trip type, yellow or green
-val tripType = "yellow"
+val tripType = "green"
 
 // Source filename format = yellow_tripdata_YYYY-MM.csv
 val srcFileNamePrefix = tripType + "_tripdata_" 
@@ -270,14 +270,15 @@ for (j <- 2009 to 2017)
           val taxiFormattedDF = taxiDF.withColumn("pulocationid", lit(""))
                     .withColumn("dolocationid", lit(""))
                     .withColumn("improvement_surcharge",lit(""))
-                    .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
-                    .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
+                    .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","lpep_pickup_datetime","lpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
                                                         ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
                                                         ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
                                                         ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
+                                                        ,"trip_year","trip_month","taxi_type")
 //             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
           taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
@@ -297,14 +298,15 @@ for (j <- 2009 to 2017)
           //Add columns
           val taxiFormattedDF = taxiDF.withColumn("pulocationid", lit(""))
                     .withColumn("dolocationid", lit(""))
-                    .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
-                    .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
+                    .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","lpep_pickup_datetime","lpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
                                                         ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
                                                         ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
                                                         ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type" 
+                                                        ,"trip_year","trip_month","taxi_type")
 //             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
           taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
@@ -326,14 +328,15 @@ for (j <- 2009 to 2017)
                     .withColumn("dolocationid", lit(""))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
-                    .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
-                    .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
+                    .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","lpep_pickup_datetime","lpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
                                                         ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
                                                         ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
                                                         ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
+                                                        ,"trip_year","trip_month","taxi_type")
 //             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
           taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
@@ -355,14 +358,15 @@ for (j <- 2009 to 2017)
                     .withColumn("pickup_latitude", lit(""))
                     .withColumn("dropoff_longitude", lit(""))
                     .withColumn("dropoff_latitude", lit(""))
-                    .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
-                    .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
+                    .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","lpep_pickup_datetime","lpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
                                                         ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
                                                         ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
                                                         ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
+                                                        ,"trip_year","trip_month","taxi_type")
 //             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
           taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
@@ -378,22 +382,24 @@ for (j <- 2009 to 2017)
           var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
           if (outputFileCount == 0) outputFileCount = 1
           //Read file using schema
-          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+//          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+          val taxiDF = sqlContext.read.format("csv").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
           // Add columns
           val taxiFormattedDF = taxiDF.withColumn("pickup_longitude", lit(""))
                     .withColumn("pickup_latitude", lit(""))
                     .withColumn("dropoff_longitude", lit(""))
                     .withColumn("dropoff_latitude", lit(""))
-                    .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
-                    .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
+                    .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","lpep_pickup_datetime","lpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
                                                         ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
                                                         ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
                                                         ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
+                                                        ,"trip_year","trip_month","taxi_type")
 //             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
           taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
@@ -420,16 +426,17 @@ for (j <- 2009 to 2017)
                     .withColumn("improvement_surcharge",lit(""))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
-                    .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
-                    .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
+                    .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","tpep_pickup_datetime","tpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
                                                         ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
                                                         ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
                                                         ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
+                                                        ,"trip_year","trip_month","taxi_type")
 //             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
           taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
@@ -451,16 +458,17 @@ for (j <- 2009 to 2017)
                     .withColumn("dolocationid", lit(""))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
-                    .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
-                    .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
+                    .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","tpep_pickup_datetime","tpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
                                                         ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
                                                         ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
                                                         ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
+                                                        ,"trip_year","trip_month","taxi_type")
 //             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
           taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
@@ -482,16 +490,17 @@ for (j <- 2009 to 2017)
                     .withColumn("pickup_latitude", lit(""))
                     .withColumn("dropoff_longitude", lit(""))
                     .withColumn("dropoff_latitude", lit(""))
-                    .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
-                    .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
+                    .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","tpep_pickup_datetime","tpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
                                                         ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
                                                         ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
                                                         ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
+                                                        ,"trip_year","trip_month","taxi_type") 
 //             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
           taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
@@ -513,18 +522,19 @@ for (j <- 2009 to 2017)
                     .withColumn("pickup_latitude", lit(""))
                     .withColumn("dropoff_longitude", lit(""))
                     .withColumn("dropoff_latitude", lit(""))
-                    .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
-                    .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
+                    .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                    .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","tpep_pickup_datetime","tpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
                                                         ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
                                                         ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
                                                         ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
+                                                        ,"trip_year","trip_month","taxi_type")
 //             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
           taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
@@ -573,7 +583,7 @@ for (j <- 2017 to 2017)
 // COMMAND ----------
 
 
-val dataDir=destDataDirRoot + "/trip_year=2009/"
+val dataDir=destDataDirRoot + "/trip_year=2017"
 println(dataDir)
 val deleteDirStatus = dbutils.fs.rm(dataDir,recurse=true)
 println(deleteDirStatus)
@@ -581,6 +591,11 @@ println(deleteDirStatus)
 // COMMAND ----------
 
 println(destDataDirRoot)
+
+// COMMAND ----------
+
+val trips = spark.read.parquet("/mnt/data/nyctaxi/raw/trip_year=2017/trip_month=01/trip_type=green")
+display(trips)
 
 // COMMAND ----------
 
