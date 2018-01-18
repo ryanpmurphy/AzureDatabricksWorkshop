@@ -207,7 +207,12 @@ val yellowTripSchemaPre2015 = StructType(Array(
     StructField("tolls_amount", DoubleType, true),
     StructField("total_amount", DoubleType, true)))
 
-val yellowTripSchemaColList = """"VendorID","tpep_pickup_datetime","tpep_dropoff_datetime","passenger_count","trip_distance","pickup_longitude","pickup_latitude","RatecodeID","store_and_fwd_flag","dropoff_longitude","dropoff_latitude","PULocationID", "DOLocationID", "payment_type", "fare_amount","extra", "mta_tax" , "tip_amount", "tolls_amount", "improvement_surcharge", "total_amount"""
+// val yellowTripSchemaColList = """"VendorID","tpep_pickup_datetime","tpep_dropoff_datetime","passenger_count","trip_distance","pickup_longitude","pickup_latitude","RatecodeID","store_and_fwd_flag","dropoff_longitude","dropoff_latitude","PULocationID", "DOLocationID", "payment_type", "fare_amount","extra", "mta_tax" , "tip_amount", "tolls_amount", "improvement_surcharge", "total_amount"""
+
+
+val canonicalTripSchemaColList = """"VendorID","tpep_pickup_datetime","tpep_dropoff_datetime","passenger_count","trip_distance","pickup_longitude","pickup_latitude","RatecodeID","store_and_fwd_flag","dropoff_longitude","dropoff_latitude","PULocationID", "DOLocationID", "payment_type", "fare_amount","extra", "mta_tax" , "tip_amount", "tolls_amount", "improvement_surcharge", "total_amount"""
+
+
 
 // COMMAND ----------
 
@@ -268,8 +273,14 @@ for (j <- 2009 to 2017)
                     .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","lpep_pickup_datetime","lpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
+                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
+                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
-          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
@@ -289,8 +300,14 @@ for (j <- 2009 to 2017)
                     .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","lpep_pickup_datetime","lpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
+                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
+                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
-          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
@@ -312,8 +329,14 @@ for (j <- 2009 to 2017)
                     .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","lpep_pickup_datetime","lpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
+                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
+                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
-          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
@@ -335,8 +358,14 @@ for (j <- 2009 to 2017)
                     .withColumn("trip_year",substring(col("lpep_pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("lpep_pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","lpep_pickup_datetime","lpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
+                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
+                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
-          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
@@ -360,8 +389,14 @@ for (j <- 2009 to 2017)
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","lpep_pickup_datetime","lpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
+                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
+                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
-          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
@@ -388,8 +423,16 @@ for (j <- 2009 to 2017)
                     .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+                    .withColumn("ehail_fee",lit(""))
+                    .withColumn("trip_type",lit(""))
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","tpep_pickup_datetime","tpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
+                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
+                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
-          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
@@ -411,8 +454,16 @@ for (j <- 2009 to 2017)
                     .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+                    .withColumn("ehail_fee",lit(""))
+                    .withColumn("trip_type",lit(""))
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","tpep_pickup_datetime","tpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
+                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
+                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
-          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
@@ -434,8 +485,16 @@ for (j <- 2009 to 2017)
                     .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+                    .withColumn("ehail_fee",lit(""))
+                    .withColumn("trip_type",lit(""))
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","tpep_pickup_datetime","tpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
+                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
+                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
-          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
@@ -459,8 +518,16 @@ for (j <- 2009 to 2017)
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
+                    .withColumn("ehail_fee",lit(""))
+                    .withColumn("trip_type",lit(""))
+           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","tpep_pickup_datetime","tpep_dropoff_datetime","store_and_fwd_flag","ratecodeid"
+                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
+                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
+                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
+                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type") 
+//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
           //Write parquet output
-          taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
