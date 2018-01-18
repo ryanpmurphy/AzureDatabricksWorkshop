@@ -188,7 +188,7 @@ val yellowTripSchema20152016H1 = StructType(Array(
     StructField("total_amount", DoubleType, true)))
 
 val yellowTripSchemaPre2015 = StructType(Array(
-    StructField("vendorid", IntegerType, true),
+    StructField("vendorid", StringType, true),
     StructField("tpep_pickup_datetime", TimestampType, true),
     StructField("tpep_dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
@@ -199,7 +199,7 @@ val yellowTripSchemaPre2015 = StructType(Array(
     StructField("store_and_fwd_flag", StringType, true),
     StructField("dropoff_longitude", DoubleType, true),
     StructField("dropoff_latitude", DoubleType, true),
-    StructField("payment_type", IntegerType, true),
+    StructField("payment_type", StringType, true),
     StructField("fare_amount", DoubleType, true),
     StructField("extra", DoubleType, true),
     StructField("mta_tax", DoubleType, true),
@@ -214,7 +214,7 @@ val yellowTripSchemaColList = """"VendorID","tpep_pickup_datetime","tpep_dropoff
 // Variables and other parameters
 
 // Taxi trip type, yellow or green
-val tripType = "green"
+val tripType = "yellow"
 
 // Source filename format = yellow_tripdata_YYYY-MM.csv
 val srcFileNamePrefix = tripType + "_tripdata_" 
@@ -236,7 +236,7 @@ val minCompactedFileSizeInMB = 64
 
 var taxiSchema : StructType = null
 
-for (j <- 2017 to 2017)
+for (j <- 2009 to 2017)
   {
     //Create destination partition - year
     dbutils.fs.mkdirs(destDataDirRoot + "trip_year=" + j) 
@@ -246,7 +246,7 @@ for (j <- 2017 to 2017)
       val srcDataFile=srcDataDirRoot + "year=" + j + "/month=" +  "%02d".format(i) + "/type=" + tripType + "/" + tripType + "_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
       println("srcDataFile = " + srcDataFile)
       //Destination directory  
-      val destDataDir = destDataDirRoot + "/trip_year=" + j + "/trip_month=" + "%02d".format(i)      
+      val destDataDir = destDataDirRoot + "/trip_year=" + j + "/trip_month=" + "%02d".format(i) + "/trip_type=" + tripType
       println("destDataDir = " + destDataDir)
 
       //GREEN TRIPS
@@ -270,6 +270,8 @@ for (j <- 2017 to 2017)
                     .withColumn("taxi_type",lit(tripType))
           //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
+          dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if(j == 2015 && i < 7){
           //Set schema
@@ -289,6 +291,8 @@ for (j <- 2017 to 2017)
                     .withColumn("taxi_type",lit(tripType))
           //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
+          dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if((j == 2016 && i < 7) || (j == 2015 && i > 6)){
           //Set schema
@@ -310,6 +314,8 @@ for (j <- 2017 to 2017)
                     .withColumn("taxi_type",lit(tripType))
           //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
+          dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if(j == 2016 && i > 6){
           //Set schema
@@ -331,6 +337,8 @@ for (j <- 2017 to 2017)
                     .withColumn("taxi_type",lit(tripType))
           //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
+          dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if(j == 2017 && i < 7){
           //Set schema
@@ -354,6 +362,8 @@ for (j <- 2017 to 2017)
                     .withColumn("junk2",lit(""))
           //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
+          dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
       }
 
@@ -380,6 +390,8 @@ for (j <- 2017 to 2017)
                     .withColumn("taxi_type",lit(tripType))
           //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
+          dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if((j == 2016 && i < 7) || (j == 2015)){
           //Set schema
@@ -401,6 +413,8 @@ for (j <- 2017 to 2017)
                     .withColumn("taxi_type",lit(tripType))
           //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
+          dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if(j == 2016 && i > 6){
           //Set schema
@@ -422,6 +436,8 @@ for (j <- 2017 to 2017)
                     .withColumn("taxi_type",lit(tripType))
           //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
+          dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if(j == 2017 && i < 7){
           //Set schema
@@ -445,6 +461,8 @@ for (j <- 2017 to 2017)
                     .withColumn("junk2",lit(""))
           //Write parquet output
           taxiFormattedDF.coalesce(outputFileCount).write.parquet(destDataDir)
+          // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
+          dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
       }
 
@@ -454,8 +472,6 @@ for (j <- 2017 to 2017)
       //For some years, we will need multiple dataframe writes to get to the desired column ordering
       //TODO-END....................................
 
-      // Delete residual files from job operation (_SUCCESS, _start*, _committed*)      
-      dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
       
     } 
   }
@@ -490,7 +506,7 @@ for (j <- 2017 to 2017)
 // COMMAND ----------
 
 
-val dataDir=destDataDirRoot + "/trip_year=2017/"
+val dataDir=destDataDirRoot + "/trip_year=2009/"
 println(dataDir)
 val deleteDirStatus = dbutils.fs.rm(dataDir,recurse=true)
 println(deleteDirStatus)
