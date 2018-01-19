@@ -236,12 +236,29 @@ val minCompactedFileSizeInMB = 64
 
 // COMMAND ----------
 
+//Function to calculate # of partition files
+//accepts file path and target partition file size
+val outputFileCount = (srcDataFile: String, minCompactedFileSizeInMB: Int) => {
+  val estFileCount = Math.floor((fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16) / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
+  if(estFileCount == 0) 1 else estFileCount
+}
+
+// COMMAND ----------
+
+//Set canonical column list
+val canonicalTripSchemaColList = Seq("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid","pulocationid","dolocationid",
+                                       "pickup_longitude","pickup_latitude","dropoff_longitude","dropoff_latitude","passenger_count",
+                                       "trip_distance","fare_amount","extra","mta_tax","tip_amount","tolls_amount","ehail_fee",
+                                       "improvement_surcharge","total_amount","payment_type","trip_year","trip_month","taxi_type")
+
+// COMMAND ----------
+
 //Load Source data to Raw
 ///////////////////////////////
 
 var taxiSchema : StructType = null
 
-for (j <- 2009 to 2017)
+for (j <- 2015 to 2017)
   {
     //Create destination partition - year
     dbutils.fs.mkdirs(destDataDirRoot + "trip_year=" + j) 
@@ -259,11 +276,6 @@ for (j <- 2009 to 2017)
         if((j == 2013 && i > 7) || (j == 2014)){
           //Set schema
           taxiSchema = greenTripSchemaPre2015
-          //Calc output files to coalesce to
-          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
-          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
-          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
-          if (outputFileCount == 0) outputFileCount = 1
           //Read file using schema
           val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
           //Add columns
@@ -273,26 +285,15 @@ for (j <- 2009 to 2017)
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
-                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
-                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
-                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
-                                                        ,"trip_year","trip_month","taxi_type")
-//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
-          //Write parquet output
-          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
+           val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
+          //Write parquet output, calling function to calculate number of partition files
+          taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if(j == 2015 && i < 7){
           //Set schema
           taxiSchema = greenTripSchema2015H1
-          //Calc output files to coalesce to
-          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
-          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
-          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
-          if (outputFileCount == 0) outputFileCount = 1
           //Read file using schema
           val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
           //Add columns
@@ -301,26 +302,15 @@ for (j <- 2009 to 2017)
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
-                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
-                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
-                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type" 
-                                                        ,"trip_year","trip_month","taxi_type")
-//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
-          //Write parquet output
-          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
+           val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
+          //Write parquet output, calling function to calculate number of partition files
+          taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if((j == 2016 && i < 7) || (j == 2015 && i > 6)){
           //Set schema
           taxiSchema = greenTripSchema2015H22016H1
-          //Calc output files to coalesce to
-          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
-          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
-          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
-          if (outputFileCount == 0) outputFileCount = 1
           //Read file using schema
           val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
           // Add columns
@@ -331,26 +321,15 @@ for (j <- 2009 to 2017)
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
-                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
-                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
-                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
-                                                        ,"trip_year","trip_month","taxi_type")
-//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
-          //Write parquet output
-          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
+           val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
+          //Write parquet output, calling function to calculate number of partition files
+          taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if(j == 2016 && i > 6){
           //Set schema
           taxiSchema = greenTripSchema2016H2
-          //Calc output files to coalesce to
-          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
-          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
-          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
-          if (outputFileCount == 0) outputFileCount = 1
           //Read file using schema
           val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
           // Add columns
@@ -361,29 +340,17 @@ for (j <- 2009 to 2017)
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
-                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
-                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
-                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
-                                                        ,"trip_year","trip_month","taxi_type")
-//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
-          //Write parquet output
-          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
+           val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
+          //Write parquet output, calling function to calculate number of partition files
+          taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if(j == 2017 && i < 7){
           //Set schema
           taxiSchema = greenTripSchema2017H1
-          //Calc output files to coalesce to
-          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
-          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
-          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
-          if (outputFileCount == 0) outputFileCount = 1
           //Read file using schema
-//          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
-          val taxiDF = sqlContext.read.format("csv").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
+          val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
           // Add columns
           val taxiFormattedDF = taxiDF.withColumn("pickup_longitude", lit(""))
                     .withColumn("pickup_latitude", lit(""))
@@ -394,15 +361,9 @@ for (j <- 2009 to 2017)
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
-                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
-                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
-                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
-                                                        ,"trip_year","trip_month","taxi_type")
-//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
-          //Write parquet output
-          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
+           val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
+          //Write parquet output, calling function to calculate number of partition files
+          taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
@@ -413,11 +374,6 @@ for (j <- 2009 to 2017)
         if(j > 2008 && j < 2015){
           //Set schema
           taxiSchema = yellowTripSchemaPre2015
-          //Calc output files to coalesce to
-          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
-          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
-          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
-          if (outputFileCount == 0) outputFileCount = 1
           //Read file using schema
           val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
           //Add columns
@@ -431,26 +387,15 @@ for (j <- 2009 to 2017)
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
-                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
-                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
-                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
-                                                        ,"trip_year","trip_month","taxi_type")
-//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
-          //Write parquet output
-          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
+           val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
+          //Write parquet output, calling function to calculate number of partition files
+          taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if((j == 2016 && i < 7) || (j == 2015)){
           //Set schema
           taxiSchema = yellowTripSchema20152016H1
-          //Calc output files to coalesce to
-          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
-          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
-          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
-          if (outputFileCount == 0) outputFileCount = 1
           //Read file using schema
           val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
           //Add columns
@@ -463,26 +408,15 @@ for (j <- 2009 to 2017)
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
-                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
-                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
-                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
-                                                        ,"trip_year","trip_month","taxi_type")
-//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
-          //Write parquet output
-          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
+           val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
+          //Write parquet output, calling function to calculate number of partition files
+          taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if(j == 2016 && i > 6){
           //Set schema
           taxiSchema = yellowTripSchema2016H2
-          //Calc output files to coalesce to
-          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
-          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
-          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
-          if (outputFileCount == 0) outputFileCount = 1
           //Read file using schema
           val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
           //Add columns
@@ -495,26 +429,15 @@ for (j <- 2009 to 2017)
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
-                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
-                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
-                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
-                                                        ,"trip_year","trip_month","taxi_type") 
-//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
-          //Write parquet output
-          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
+           val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
+          //Write parquet output, calling function to calculate number of partition files
+          taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
         else if(j == 2017 && i < 7){
           //Set schema
           taxiSchema = yellowTripSchema2017H1
-          //Calc output files to coalesce to
-          val srcSize= fs.getContentSummary(new Path(srcDataFile)).getLength 
-          val inputDirSize = fs.getContentSummary(new Path(srcDataFile)).getLength * 3/16
-          var outputFileCount = Math.floor(inputDirSize / (minCompactedFileSizeInMB * 1024 * 1024)).toInt
-          if (outputFileCount == 0) outputFileCount = 1
           //Read file using schema
           val taxiDF = sqlContext.read.format("csv").option("header", "true").schema(taxiSchema).option("delimiter",",").option("mode", "DROPMALFORMED").load(srcDataFile).cache()
           //Add columns
@@ -529,27 +452,13 @@ for (j <- 2009 to 2017)
                     .withColumn("junk2",lit(""))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
-           val taxiCanonicalDF = taxiFormattedDF.select("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid"
-                                                        ,"pulocationid","dolocationid","pickup_longitude","pickup_latitude"
-                                                        ,"dropoff_longitude","dropoff_latitude","passenger_count","trip_distance"
-                                                        ,"fare_amount","extra","mta_tax","tip_amount","tolls_amount"
-                                                        ,"ehail_fee","improvement_surcharge","total_amount","payment_type"
-                                                        ,"trip_year","trip_month","taxi_type")
-//             val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList) 
-          //Write parquet output
-          taxiCanonicalDF.coalesce(outputFileCount).write.parquet(destDataDir)
+           val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
+          //Write parquet output, calling function to calculate number of partition files
+          taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
           dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
         }
       }
-
-
-      //TODO-START....................................
-      //Add other schemas here; Column list will come into play to ensure columns for all years are ordered
-      //For some years, we will need multiple dataframe writes to get to the desired column ordering
-      //TODO-END....................................
-
-      
     } 
   }
 
@@ -583,8 +492,8 @@ for (j <- 2017 to 2017)
 // COMMAND ----------
 
 
-val dataDir=destDataDirRoot + "/trip_year=2017"
-println(dataDir)
+val dataDir=destDataDirRoot + "/trip_year=2016"
+
 val deleteDirStatus = dbutils.fs.rm(dataDir,recurse=true)
 println(deleteDirStatus)
 
@@ -594,7 +503,7 @@ println(destDataDirRoot)
 
 // COMMAND ----------
 
-val trips = spark.read.parquet("/mnt/data/nyctaxi/raw/trip_year=2017/trip_month=01/trip_type=green")
+val trips = spark.read.parquet("/mnt/data/nyctaxi/raw/trip_year=2013/trip_month=08/trip_type=green")
 display(trips)
 
 // COMMAND ----------
