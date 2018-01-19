@@ -219,10 +219,10 @@ val yellowTripSchemaPre2015 = StructType(Array(
 // Variables and other parameters
 
 // Taxi trip type, yellow or green
-val tripType = "green"
+val taxiType = "green"
 
 // Source filename format = yellow_tripdata_YYYY-MM.csv
-val srcFileNamePrefix = tripType + "_tripdata_" 
+val srcFileNamePrefix = taxiType + "_tripdata_" 
 val srcFileNameSuffix = ".csv"
 
 // Source file directory
@@ -249,7 +249,7 @@ val outputFileCount = (srcDataFile: String, minCompactedFileSizeInMB: Int) => {
 val canonicalTripSchemaColList = Seq("vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid","pulocationid","dolocationid",
                                        "pickup_longitude","pickup_latitude","dropoff_longitude","dropoff_latitude","passenger_count",
                                        "trip_distance","fare_amount","extra","mta_tax","tip_amount","tolls_amount","ehail_fee",
-                                       "improvement_surcharge","total_amount","payment_type","trip_year","trip_month","taxi_type")
+                                       "improvement_surcharge","total_amount","payment_type","trip_type","trip_year","trip_month","taxi_type")
 
 // COMMAND ----------
 
@@ -265,14 +265,14 @@ for (j <- 2017 to 2017)
     for (i <- 1 to 12) 
     {
       //Source file  
-      val srcDataFile=srcDataDirRoot + "year=" + j + "/month=" +  "%02d".format(i) + "/type=" + tripType + "/" + tripType + "_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
+      val srcDataFile=srcDataDirRoot + "year=" + j + "/month=" +  "%02d".format(i) + "/type=" + taxiType + "/" + taxiType + "_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
       println("srcDataFile = " + srcDataFile)
       //Destination directory  
-      val destDataDir = destDataDirRoot + "/trip_year=" + j + "/trip_month=" + "%02d".format(i) + "/trip_type=" + tripType
+      val destDataDir = destDataDirRoot + "/trip_year=" + j + "/trip_month=" + "%02d".format(i) + "/taxi_type=" + taxiType
       println("destDataDir = " + destDataDir)
 
       //GREEN TRIPS
-      if(tripType == "green"){
+      if(taxiType == "green"){
         if((j == 2013 && i > 7) || (j == 2014)){
           //Set schema
           taxiSchema = greenTripSchemaPre2015
@@ -284,7 +284,7 @@ for (j <- 2017 to 2017)
                     .withColumn("improvement_surcharge",lit(""))
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
-                    .withColumn("taxi_type",lit(tripType))
+                    .withColumn("taxi_type",lit(taxiType))
                     .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
@@ -302,7 +302,7 @@ for (j <- 2017 to 2017)
                     .withColumn("dolocationid", lit(""))
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
-                    .withColumn("taxi_type",lit(tripType))
+                    .withColumn("taxi_type",lit(taxiType))
                     .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
@@ -322,7 +322,7 @@ for (j <- 2017 to 2017)
                     .withColumn("junk2",lit(""))
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
-                    .withColumn("taxi_type",lit(tripType))
+                    .withColumn("taxi_type",lit(taxiType))
                     .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
@@ -342,7 +342,7 @@ for (j <- 2017 to 2017)
                     .withColumn("dropoff_latitude", lit(""))
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
-                    .withColumn("taxi_type",lit(tripType))
+                    .withColumn("taxi_type",lit(taxiType))
                     .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
@@ -362,7 +362,7 @@ for (j <- 2017 to 2017)
                     .withColumn("dropoff_latitude", lit(""))
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
-                    .withColumn("taxi_type",lit(tripType))
+                    .withColumn("taxi_type",lit(taxiType))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
                     .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
@@ -375,7 +375,7 @@ for (j <- 2017 to 2017)
       }
 
       //YELLOW TRIPS
-      else if(tripType == "yellow"){
+      else if(taxiType == "yellow"){
         if(j > 2008 && j < 2015){
           //Set schema
           taxiSchema = yellowTripSchemaPre2015
@@ -389,7 +389,7 @@ for (j <- 2017 to 2017)
                     .withColumn("junk2",lit(""))
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
-                    .withColumn("taxi_type",lit(tripType))
+                    .withColumn("taxi_type",lit(taxiType))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
@@ -410,7 +410,7 @@ for (j <- 2017 to 2017)
                     .withColumn("junk2",lit(""))
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
-                    .withColumn("taxi_type",lit(tripType))
+                    .withColumn("taxi_type",lit(taxiType))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
                     .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
@@ -432,7 +432,7 @@ for (j <- 2017 to 2017)
                     .withColumn("dropoff_latitude", lit(""))
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
-                    .withColumn("taxi_type",lit(tripType))
+                    .withColumn("taxi_type",lit(taxiType))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
                     .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
@@ -454,7 +454,7 @@ for (j <- 2017 to 2017)
                     .withColumn("dropoff_latitude", lit(""))
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
-                    .withColumn("taxi_type",lit(tripType))
+                    .withColumn("taxi_type",lit(taxiType))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
                     .withColumn("ehail_fee",lit(""))
@@ -511,8 +511,10 @@ println(destDataDirRoot)
 
 // COMMAND ----------
 
-val trips = spark.read.parquet("/mnt/data/nyctaxi/raw/trip_year=2013/trip_month=08/trip_type=green")
-display(trips)
+val trips = spark.read.parquet("/mnt/data/nyctaxi/raw/trip_year=2017/trip_month=06/taxi_type=green")
+//display(trips)
+trips.write.saveAsTable("tripstable")
+
 
 // COMMAND ----------
 
