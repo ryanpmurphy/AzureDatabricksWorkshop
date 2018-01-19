@@ -34,8 +34,8 @@ val yellowTripSchema2017H1 = StructType(Array(
 //Second half of 2016
 val yellowTripSchema2016H2 = StructType(Array(
     StructField("vendorid", IntegerType, true),
-    StructField("pickup_datetime", TimestampType, true),
-    StructField("dropoff_datetime", TimestampType, true),
+    StructField("tpep_pickup_datetime", TimestampType, true),
+    StructField("tpep_dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
     StructField("ratecodeid", IntegerType, true),
@@ -56,8 +56,8 @@ val yellowTripSchema2016H2 = StructType(Array(
 //2015 and 2016 first half of the year
 val yellowTripSchema20152016H1 = StructType(Array(
     StructField("vendorid", IntegerType, true),
-    StructField("pickup_datetime", TimestampType, true),
-    StructField("dropoff_datetime", TimestampType, true),
+    StructField("tpep_pickup_datetime", TimestampType, true),
+    StructField("tpep_dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
     StructField("pickup_longitude", DoubleType, true),
@@ -78,8 +78,8 @@ val yellowTripSchema20152016H1 = StructType(Array(
 //2009 though 2014
 val yellowTripSchemaPre2015 = StructType(Array(
     StructField("vendorid", StringType, true),
-    StructField("pickup_datetime", TimestampType, true),
-    StructField("dropoff_datetime", TimestampType, true),
+    StructField("tpep_pickup_datetime", TimestampType, true),
+    StructField("tpep_dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
     StructField("pickup_longitude", DoubleType, true),
@@ -228,7 +228,7 @@ val canonicalTripSchemaColList = Seq("vendorid","tpep_pickup_datetime","tpep_dro
 // COMMAND ----------
 
 //Delete any residual data from prior executions for an idempotent run
-val dataDir=destDataDirRoot + "/trip_year=2017"
+val dataDir=destDataDirRoot + "/trip_year=2009"
 val deleteDirStatus = dbutils.fs.rm(dataDir,recurse=true)
 println(deleteDirStatus)
 
@@ -239,7 +239,7 @@ println(deleteDirStatus)
 //Add columns of interest
 //Save as parquet
 
-for (j <- 2009 to 2017)
+for (j <- 2017 to 2017)
   {
     //Create destination partition - year
     dbutils.fs.mkdirs(destDataDirRoot + "trip_year=" + j) 
@@ -250,6 +250,8 @@ for (j <- 2009 to 2017)
       
       //Source path  
       val srcDataFile= srcDataDirRoot + "year=" + j + "/month=" +  "%02d".format(i) + "/type=yellow/yellow_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
+      println(srcDataFile)
+      
       //Destination path  
       val destDataDir = destDataDirRoot + "/trip_year=" + j + "/trip_month=" + "%02d".format(i) + "/taxi_type=yellow"
 
@@ -277,6 +279,24 @@ for (j <- 2009 to 2017)
       dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
     }
   }
+
+// COMMAND ----------
+
+val taxiDF = sqlContext.read.format("csv")
+                      .option("header", "true")
+                      .option("inferSchema", "true")
+                      .option("delimiter",",")
+                      .option("mode", "DROPMALFORMED")
+                      .load("/mnt/data/nyctaxi/source/year=2009/month=01/type=yellow/yellow_tripdata_2009-01.csv").cache()
+  //.(yellowTripSchemaPre2015)
+
+
+taxiDF.printSchema
+taxiDF.head()
+
+// COMMAND ----------
+
+dbutils.fs.head("/mnt/data/nyctaxi/source/year=2009/month=01/type=yellow/yellow_tripdata_2009-01.csv")
 
 // COMMAND ----------
 
