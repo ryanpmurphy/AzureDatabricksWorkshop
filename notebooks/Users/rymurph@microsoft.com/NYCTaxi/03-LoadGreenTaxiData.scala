@@ -258,7 +258,7 @@ val canonicalTripSchemaColList = Seq("vendorid","pickup_datetime","dropoff_datet
 
 var taxiSchema : StructType = null
 
-for (j <- 2015 to 2017)
+for (j <- 2017 to 2017)
   {
     //Create destination partition - year
     dbutils.fs.mkdirs(destDataDirRoot + "trip_year=" + j) 
@@ -285,6 +285,7 @@ for (j <- 2015 to 2017)
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+                    .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
           taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
@@ -302,6 +303,7 @@ for (j <- 2015 to 2017)
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+                    .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
           taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
@@ -321,6 +323,7 @@ for (j <- 2015 to 2017)
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+                    .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
           taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
@@ -340,6 +343,7 @@ for (j <- 2015 to 2017)
                     .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                     .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                     .withColumn("taxi_type",lit(tripType))
+                    .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
           taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
@@ -361,7 +365,8 @@ for (j <- 2015 to 2017)
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("junk1",lit(""))
                     .withColumn("junk2",lit(""))
-           val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
+                    .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
+          val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
           taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
           // Delete residual files from job operation (_SUCCESS, _start*, _committed*)
@@ -408,6 +413,7 @@ for (j <- 2015 to 2017)
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
+                    .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
           taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
@@ -429,6 +435,7 @@ for (j <- 2015 to 2017)
                     .withColumn("taxi_type",lit(tripType))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
+                    .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
           taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
@@ -452,6 +459,7 @@ for (j <- 2015 to 2017)
                     .withColumn("junk2",lit(""))
                     .withColumn("ehail_fee",lit(""))
                     .withColumn("trip_type",lit(""))
+                    .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
            val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
           //Write parquet output, calling function to calculate number of partition files
           taxiCanonicalDF.coalesce(outputFileCount(srcDataFile, minCompactedFileSizeInMB)).write.parquet(destDataDir)
@@ -492,7 +500,7 @@ for (j <- 2017 to 2017)
 // COMMAND ----------
 
 
-val dataDir=destDataDirRoot + "/trip_year=2016"
+val dataDir=destDataDirRoot + "/trip_year=2017"
 
 val deleteDirStatus = dbutils.fs.rm(dataDir,recurse=true)
 println(deleteDirStatus)
