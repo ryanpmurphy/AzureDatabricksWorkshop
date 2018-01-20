@@ -201,27 +201,6 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
         sourceDF.withColumn("pickup_location_id", lit(0).cast(IntegerType))
                   .withColumn("dropoff_location_id", lit(0).cast(IntegerType))
                   .withColumn("improvement_surcharge",lit(0).cast(DoubleType))
-                  .withColumn("junk1",lit(""))
-                  .withColumn("junk2",lit(""))
-                  .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
-                  .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
-                  .withColumn("taxi_type",lit("green"))
-                  .withColumn("temp_pickup_longitude", col("pickup_longitude").cast(StringType))
-                                          .drop("pickup_longitude").withColumnRenamed("temp_pickup_longitude", "pickup_longitude")
-                  .withColumn("temp_dropoff_longitude", col("dropoff_longitude").cast(StringType))
-                                          .drop("dropoff_longitude").withColumnRenamed("temp_dropoff_longitude", "dropoff_longitude")
-                  .withColumn("temp_pickup_latitude", col("pickup_latitude").cast(StringType))
-                                          .drop("pickup_latitude").withColumnRenamed("temp_pickup_latitude", "pickup_latitude")
-                  .withColumn("temp_dropoff_latitude", col("dropoff_latitude").cast(StringType))
-                                          .drop("dropoff_latitude").withColumnRenamed("temp_dropoff_latitude", "dropoff_latitude")
-
-      }
-      else if((tripYear == 2016 && tripMonth < 7) || (tripYear == 2015))
-      {
-        sourceDF.withColumn("pickup_location_id", lit(0).cast(IntegerType))
-                  .withColumn("dropoff_location_id", lit(0).cast(IntegerType))
-                  .withColumn("junk1",lit(""))
-                  .withColumn("junk2",lit(""))
                   .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                   .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("green"))
@@ -234,6 +213,34 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                                           .drop("pickup_latitude").withColumnRenamed("temp_pickup_latitude", "pickup_latitude")
                   .withColumn("temp_dropoff_latitude", col("dropoff_latitude").cast(StringType))
                                           .drop("dropoff_latitude").withColumnRenamed("temp_dropoff_latitude", "dropoff_latitude")
+      }
+      else if(tripYear == 2015 && tripMonth < 7)
+      {
+        sourceDF.withColumn("pickup_location_id", lit(0).cast(IntegerType))
+                  .withColumn("dropoff_location_id", lit(0).cast(IntegerType))
+                  .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                  .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
+                  .withColumn("taxi_type",lit("green"))
+                  .withColumn("temp_vendor_id", col("vendor_id").cast(StringType)).drop("vendor_id").withColumnRenamed("temp_vendor_id", "vendor_id")
+                  .withColumn("temp_pickup_longitude", col("pickup_longitude").cast(StringType))
+                                          .drop("pickup_longitude").withColumnRenamed("temp_pickup_longitude", "pickup_longitude")
+                  .withColumn("temp_dropoff_longitude", col("dropoff_longitude").cast(StringType))
+                                          .drop("dropoff_longitude").withColumnRenamed("temp_dropoff_longitude", "dropoff_longitude")
+                  .withColumn("temp_pickup_latitude", col("pickup_latitude").cast(StringType))
+                                          .drop("pickup_latitude").withColumnRenamed("temp_pickup_latitude", "pickup_latitude")
+                  .withColumn("temp_dropoff_latitude", col("dropoff_latitude").cast(StringType))
+                                          .drop("dropoff_latitude").withColumnRenamed("temp_dropoff_latitude", "dropoff_latitude")
+      }
+      else if((tripYear == 2015 && tripMonth > 6) || (tripYear == 2016 && tripMonth < 7))
+      {
+        sourceDF.withColumn("pickup_location_id", lit(0).cast(IntegerType))
+                  .withColumn("dropoff_location_id", lit(0).cast(IntegerType))
+                  .withColumn("junk1",lit(""))
+                  .withColumn("junk2",lit(""))
+                  .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                  .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
+                  .withColumn("taxi_type",lit("green"))
+                  .withColumn("temp_vendor_id", col("vendor_id").cast(StringType)).drop("vendor_id").withColumnRenamed("temp_vendor_id", "vendor_id")
       }
       else if(tripYear == 2016 && tripMonth > 6)
       {
@@ -265,7 +272,7 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
 
 // COMMAND ----------
 
-//Canonical ordered column list for yellow taxi across years to homogenize schema
+//Canonical ordered column list for green taxi across years to homogenize schema
 //These are actual columns names in the header of source data as is
 val canonicalTripSchemaColList = Seq("taxi_type","vendor_id","pickup_datetime","dropoff_datetime","store_and_fwd_flag","rate_code_id","pickup_location_id","dropoff_location_id","pickup_longitude","pickup_latitude","dropoff_longitude","dropoff_latitude","passenger_count","trip_distance","fare_amount","extra","mta_tax","tip_amount","tolls_amount","improvement_surcharge","total_amount","trip_year","trip_month")
 
@@ -293,7 +300,7 @@ for (j <- 2009 to 2017)
     {
       
       //Source path  
-      val srcDataFile= srcDataDirRoot + "year=" + j + "/month=" +  "%02d".format(i) + "/type=yellow/yellow_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
+      val srcDataFile= srcDataDirRoot + "year=" + j + "/month=" +  "%02d".format(i) + "/type=green/green_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
       println("Year=" + j + "; Month=" + i)
       println(srcDataFile)
 
@@ -315,7 +322,7 @@ for (j <- 2009 to 2017)
       //Add additional columns to homogenize schema across years
       val taxiFormattedDF = getSchemaHomogenizedDataframe(taxiDF, j, i)
 
-      //Order all columns to align with the canonical schema for yellow taxi
+      //Order all columns to align with the canonical schema for green taxi
       val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
 
       //To make Hive Parquet format compatible with Spark Parquet format
@@ -329,13 +336,13 @@ for (j <- 2009 to 2017)
 
       
       //Add partition for year and month
-      sql("ALTER TABLE nyc_db.trips_yellow_raw_prq ADD IF NOT EXISTS PARTITION (trip_year=" + j + ",trip_month=" + "%02d".format(i) + ") LOCATION '" + destDataDir.dropRight(1) + "'")
+      sql("ALTER TABLE nyc_db.trips_green_raw_prq ADD IF NOT EXISTS PARTITION (trip_year=" + j + ",trip_month=" + "%02d".format(i) + ") LOCATION '" + destDataDir.dropRight(1) + "'")
     
       //Refresh table
-      sql("REFRESH TABLE nyc_db.trips_yellow_raw_prq")
+      sql("REFRESH TABLE nyc_db.trips_green_raw_prq")
     }
   }
-sql("ANALYZE TABLE nyc_db.trips_yellow_raw_prq COMPUTE STATISTICS")
+sql("ANALYZE TABLE nyc_db.trips_green_raw_prq COMPUTE STATISTICS")
 
 
 // COMMAND ----------
