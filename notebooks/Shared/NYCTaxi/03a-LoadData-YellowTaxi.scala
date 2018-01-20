@@ -102,7 +102,7 @@ val fs = FileSystem.get(new Configuration())
 val srcDataDirRoot = "/mnt/data/nyctaxi/source/" //Root dir for source data
 val destDataDirRoot = "/mnt/data/nyctaxi/raw/yellow-taxi" //Root dir for formatted data
 val targetedFileSizeMB = 64 //Dont want very small files - we want to keep each part file at least 64 MB
-val parquetSpaceSaving = 0.19 //We found a saving in space of 19% with Parquet
+val prqShrinkageFactor = 0.19 //We found a saving in space of 81% with Parquet
 
 // COMMAND ----------
 
@@ -115,7 +115,7 @@ val parquetSpaceSaving = 0.19 //We found a saving in space of 19% with Parquet
 
 val calcOutputFileCount = (srcDataFile: String) => 
 {
-  val estFileCount: Int = Math.floor((fs.getContentSummary(new Path(srcDataFile)).getLength * parquetSpaceSaving) / (targetedFileSizeMB * 1024 * 1024)).toInt
+  val estFileCount: Int = Math.floor((fs.getContentSummary(new Path(srcDataFile)).getLength * prqShrinkageFactor) / (targetedFileSizeMB * 1024 * 1024)).toInt
   
   if(estFileCount == 0) 1 else estFileCount
 }
@@ -228,7 +228,7 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
 
 //Canonical ordered column list for yellow taxi across years to homogenize schema
 //These are actual columns names in the header of source data as is
-val canonicalTripSchemaColList = Seq("taxi_type","vendor_id","pickup_datetime","dropoff_datetime","store_and_fwd_flag","rate_code_id","pickup_location_id","dropoff_location_id","pickup_longitude","pickup_latitude","dropoff_longitude","dropoff_latitude","passenger_count","trip_distance","fare_amount","extra","mta_tax","tip_amount","tolls_amount","improvement_surcharge","total_amount","trip_year","trip_month")
+val canonicalTripSchemaColList = Seq("taxi_type","vendor_id","pickup_datetime","dropoff_datetime","store_and_fwd_flag","rate_code_id","pickup_location_id","dropoff_location_id","pickup_longitude","pickup_latitude","dropoff_longitude","dropoff_latitude","passenger_count","trip_distance","fare_amount","extra","mta_tax","tip_amount","tolls_amount","improvement_surcharge","total_amount","payment_type","trip_year","trip_month")
 
 // COMMAND ----------
 
