@@ -83,6 +83,35 @@
 // MAGIC %sql
 // MAGIC use nyc_db;
 // MAGIC 
+// MAGIC DROP TABLE IF EXISTS refdata_taxi_zone_lookup;
+// MAGIC 
+// MAGIC CREATE TABLE IF NOT EXISTS refdata_taxi_zone_lookup(
+// MAGIC location_id STRING,
+// MAGIC borough STRING,
+// MAGIC zone STRING,
+// MAGIC service_zone STRING)
+// MAGIC USING parquet
+// MAGIC LOCATION 'wasbs://refdata@gaiasa.blob.core.windows.net/taxi-zone/';
+
+// COMMAND ----------
+
+// MAGIC %sql
+// MAGIC use nyc_db;
+// MAGIC 
+// MAGIC DROP TABLE IF EXISTS refdata_trip_month_lookup;
+// MAGIC 
+// MAGIC CREATE TABLE IF NOT EXISTS refdata_trip_month_lookup(
+// MAGIC trip_month STRING,
+// MAGIC month_name_short STRING,
+// MAGIC month_name_full STRING)
+// MAGIC USING parquet
+// MAGIC LOCATION 'wasbs://refdata@gaiasa.blob.core.windows.net/trip-month/';
+
+// COMMAND ----------
+
+// MAGIC %sql
+// MAGIC use nyc_db;
+// MAGIC 
 // MAGIC --msck repair table trips_yellow_raw_prq
 // MAGIC --show partitions trips_yellow_raw_prq 
 // MAGIC --alter table trips_yellow_raw_prq add if not exists partition (trip_year=2016,trip_month=01) LOCATION 'wasbs://raw@gaiasa.blob.core.windows.net/yellow-taxi/trip_year=2016/trip_month=01';
