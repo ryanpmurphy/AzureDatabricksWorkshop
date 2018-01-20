@@ -18,8 +18,8 @@ import scala.sys.process.ProcessLogger
 // This is not required if storage conf is set at cluster level
 //================================================================================
 // spark.conf.set(
-//   "fs.azure.account.key.gaialabsa.blob.core.windows.net",
-//   "bXE4JN3iQ32ANf6xtpwRxZqYZk8TlAXCXacASB84jg91TsFiz5sLEzy2v5+ThiBgfrf6qVkkbxkxGPahbEoF7Q==")
+//   "fs.azure.account.key.gaiasa.blob.core.windows.net",
+//   "<the SA key>")
 
 
 // COMMAND ----------
@@ -30,7 +30,7 @@ import scala.sys.process.ProcessLogger
 "wget -P /tmp https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv" !!
 
 val localPath="file:/tmp/taxi+_zone_lookup.csv"
-val wasbPath="wasbs://source@gaialabsa.blob.core.windows.net/nyc/refdata"
+val wasbPath="wasbs://source@gaiasa.blob.core.windows.net/nyc/refdata"
 
 dbutils.fs.mkdirs(wasbPath)
 dbutils.fs.cp(localPath, wasbPath)
@@ -47,7 +47,7 @@ for (cabType <- cabTypes) {
   for (i <- 1 to 6) 
   {
     val fileName = cabType + "_tripdata_2017-0" + i + ".csv"
-    val wasbPath="wasbs://source@gaialabsa.blob.core.windows.net/nyc/year=2017/month=0" + i + "/type=" + cabType + "/"
+    val wasbPath="wasbs://source@gaiasa.blob.core.windows.net/nyc/year=2017/month=0" + i + "/type=" + cabType + "/"
     val wgetToExec = "wget -P /tmp https://s3.amazonaws.com/nyc-tlc/trip+data/" + fileName
     println(wgetToExec)
   
@@ -75,7 +75,7 @@ for (cabType <- cabTypes) {
     {
       val fileName = cabType + "_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
       println(fileName)
-      val wasbPath="wasbs://source@gaialabsa.blob.core.windows.net/nyc/year=" + j + "/month=" +  "%02d".format(i) + "/type=" + cabType + "/"
+      val wasbPath="wasbs://source@gaiasa.blob.core.windows.net/nyc/year=" + j + "/month=" +  "%02d".format(i) + "/type=" + cabType + "/"
       val wgetToExec = "wget -P /tmp https://s3.amazonaws.com/nyc-tlc/trip+data/" + fileName
       println(wgetToExec)
 
@@ -102,7 +102,7 @@ for (i <- 1 to 7)
 {
   val fileName = cabType + "_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
   println(fileName)
-  val wasbPath="wasbs://source@gaialabsa.blob.core.windows.net/nyc/year=" + j + "/month=" +  "%02d".format(i) + "/type=" + cabType + "/"
+  val wasbPath="wasbs://source@gaiasa.blob.core.windows.net/nyc/year=" + j + "/month=" +  "%02d".format(i) + "/type=" + cabType + "/"
   val wgetToExec = "wget -P /tmp https://s3.amazonaws.com/nyc-tlc/trip+data/" + fileName
   println(wgetToExec)
 
@@ -121,7 +121,7 @@ for (cabType <- cabTypes) {
   {
     val fileName = cabType + "_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
     println(fileName)
-    val wasbPath="wasbs://source@gaialabsa.blob.core.windows.net/nyc/year=" + j + "/month=" +  "%02d".format(i) + "/type=" + cabType + "/"
+    val wasbPath="wasbs://source@gaiasa.blob.core.windows.net/nyc/year=" + j + "/month=" +  "%02d".format(i) + "/type=" + cabType + "/"
     val wgetToExec = "wget -P /tmp https://s3.amazonaws.com/nyc-tlc/trip+data/" + fileName
     println(wgetToExec)
 
@@ -148,7 +148,7 @@ for (j <- 2009 to 2012)
   {
     val fileName = cabType + "_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
     println(fileName)
-    val wasbPath="wasbs://source@gaialabsa.blob.core.windows.net/nyc/year=" + j + "/month=" +  "%02d".format(i) + "/type=" + cabType + "/"
+    val wasbPath="wasbs://source@gaiasa.blob.core.windows.net/nyc/year=" + j + "/month=" +  "%02d".format(i) + "/type=" + cabType + "/"
     val wgetToExec = "wget -P /tmp https://s3.amazonaws.com/nyc-tlc/trip+data/" + fileName
     println(wgetToExec)
 
