@@ -159,7 +159,6 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
 
       if(tripYear > 2008 && tripYear < 2015)
       {
-        //println("Schema: 2008-15")
         sourceDF.withColumn("pickup_location_id", lit(0).cast(IntegerType))
                   .withColumn("dropoff_location_id", lit(0).cast(IntegerType))
                   .withColumn("improvement_surcharge",lit(0).cast(DoubleType))
@@ -180,7 +179,6 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
       }
       else if((tripYear == 2016 && tripMonth < 7) || (tripYear == 2015))
       {
-        //println("Schema: 2015+2016H1")
         sourceDF.withColumn("pickup_location_id", lit(0).cast(IntegerType))
                   .withColumn("dropoff_location_id", lit(0).cast(IntegerType))
                   .withColumn("junk1",lit(""))
@@ -197,12 +195,9 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                                           .drop("pickup_latitude").withColumnRenamed("temp_pickup_latitude", "pickup_latitude")
                   .withColumn("temp_dropoff_latitude", col("dropoff_latitude").cast(StringType))
                                           .drop("dropoff_latitude").withColumnRenamed("temp_dropoff_latitude", "dropoff_latitude")
-                  
-
       }
       else if(tripYear == 2016 && tripMonth > 6)
       {
-        //println("Schema: 2016H2")
         sourceDF.withColumn("pickup_longitude", lit(""))
                   .withColumn("pickup_latitude", lit(""))
                   .withColumn("dropoff_longitude", lit(""))
@@ -211,11 +206,9 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                   .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("yellow"))
                   .withColumn("temp_vendor_id", col("vendor_id").cast(StringType)).drop("vendor_id").withColumnRenamed("temp_vendor_id", "vendor_id")
-
       }
       else if(tripYear == 2017 && tripMonth < 7)
       {
-        //println("Schema: 2017")
         sourceDF.withColumn("pickup_longitude", lit(""))
                   .withColumn("pickup_latitude", lit(""))
                   .withColumn("dropoff_longitude", lit(""))
@@ -226,7 +219,6 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                   .withColumn("junk1",lit(""))
                   .withColumn("junk2",lit(""))
                   .withColumn("vendorid2", col("vendor_id").cast(StringType)).drop("vendor_id").withColumnRenamed("vendorid2", "vendor_id")
-
       }
   else
     sourceDF
@@ -255,16 +247,15 @@ println(deleteDirStatus)
 import spark.implicits._
 import spark.sql
 
-for (j <- 2009 to 2009)
+for (j <- 2009 to 2017)
   {
     val monthsCount = if (j==2017) 6 else 12 
-    for (i <- 1 to 1) 
+    for (i <- 1 to monthsCount) 
     {
-      
-      println("Year=" + j + "; Month=" + i)
       
       //Source path  
       val srcDataFile= srcDataDirRoot + "year=" + j + "/month=" +  "%02d".format(i) + "/type=yellow/yellow_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
+      println("Year=" + j + "; Month=" + i)
       println(srcDataFile)
 
 
@@ -287,8 +278,6 @@ for (j <- 2009 to 2009)
 
       //Order all columns to align with the canonical schema for yellow taxi
       val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
-      
-      taxiCanonicalDF.printSchema
 
       //To make Hive Parquet format compatible with Spark Parquet format
       spark.sqlContext.setConf("spark.sql.parquet.writeLegacyFormat", "true")
