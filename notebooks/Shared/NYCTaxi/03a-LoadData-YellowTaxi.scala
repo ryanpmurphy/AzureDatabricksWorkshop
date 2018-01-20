@@ -13,15 +13,15 @@ import org.apache.spark.sql.DataFrame
 
 //2017
 val yellowTripSchema2017H1 = StructType(Array(
-    StructField("vendorid", IntegerType, true),
-    StructField("tpep_pickup_datetime", TimestampType, true),
-    StructField("tpep_dropoff_datetime", TimestampType, true),
+    StructField("vendor_id", StringType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
-    StructField("ratecodeid", IntegerType, true),
+    StructField("rate_code_id", IntegerType, true),
     StructField("store_and_fwd_flag", StringType, true),
-    StructField("pulocationid", IntegerType, true),
-    StructField("dolocationid", IntegerType, true),
+    StructField("pickup_location_id", IntegerType, true),
+    StructField("dropoff_location_id", IntegerType, true),
     StructField("payment_type", IntegerType, true),
     StructField("fare_amount", DoubleType, true),
     StructField("extra", DoubleType, true),
@@ -33,15 +33,15 @@ val yellowTripSchema2017H1 = StructType(Array(
 
 //Second half of 2016
 val yellowTripSchema2016H2 = StructType(Array(
-    StructField("vendorid", IntegerType, true),
-    StructField("tpep_pickup_datetime", TimestampType, true),
-    StructField("tpep_dropoff_datetime", TimestampType, true),
+    StructField("vendor_id", StringType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
-    StructField("ratecodeid", IntegerType, true),
+    StructField("rate_code_id", IntegerType, true),
     StructField("store_and_fwd_flag", StringType, true),
-    StructField("pulocationid", IntegerType, true),
-    StructField("dolocationid", IntegerType, true),
+    StructField("pickup_location_id", IntegerType, true),
+    StructField("dropoff_location_id", IntegerType, true),
     StructField("payment_type", IntegerType, true),
     StructField("fare_amount", DoubleType, true),
     StructField("extra", DoubleType, true),
@@ -55,14 +55,14 @@ val yellowTripSchema2016H2 = StructType(Array(
 
 //2015 and 2016 first half of the year
 val yellowTripSchema20152016H1 = StructType(Array(
-    StructField("vendorid", IntegerType, true),
-    StructField("tpep_pickup_datetime", TimestampType, true),
-    StructField("tpep_dropoff_datetime", TimestampType, true),
+    StructField("vendor_id", StringType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
     StructField("pickup_longitude", DoubleType, true),
     StructField("pickup_latitude", DoubleType, true),
-    StructField("ratecodeid", IntegerType, true),
+    StructField("rate_code_id", IntegerType, true),
     StructField("store_and_fwd_flag", StringType, true),
     StructField("dropoff_longitude", DoubleType, true),
     StructField("dropoff_latitude", DoubleType, true),
@@ -77,14 +77,14 @@ val yellowTripSchema20152016H1 = StructType(Array(
 
 //2009 though 2014
 val yellowTripSchemaPre2015 = StructType(Array(
-    StructField("vendorid", StringType, true),
-    StructField("tpep_pickup_datetime", TimestampType, true),
-    StructField("tpep_dropoff_datetime", TimestampType, true),
+    StructField("vendor_id", StringType, true),
+    StructField("pickup_datetime", TimestampType, true),
+    StructField("dropoff_datetime", TimestampType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
     StructField("pickup_longitude", DoubleType, true),
     StructField("pickup_latitude", DoubleType, true),
-    StructField("ratecodeid", IntegerType, true),
+    StructField("rate_code_id", IntegerType, true),
     StructField("store_and_fwd_flag", StringType, true),
     StructField("dropoff_longitude", DoubleType, true),
     StructField("dropoff_latitude", DoubleType, true),
@@ -129,20 +129,25 @@ val calcOutputFileCount = (srcDataFile: String) =>
 
 val getTaxiSchema  = (tripYear: Int, tripMonth: Int) => {
   var taxiSchema : StructType = null
-  for (j <- 2009 to 2017)
-  {
-    for (i <- 1 to 12) 
-    {
-      if(j > 2008 && j < 2015)
+
+      if(tripYear > 2008 && tripYear < 2015){
         taxiSchema = yellowTripSchemaPre2015
-      else if(j == 2016 && i > 6)
+        println("getTaxiSchema: 2008-2015")
+      }
+      else if(tripYear == 2016 && tripMonth > 6){
+        println("getTaxiSchema: 2016H2")
         taxiSchema = yellowTripSchema2016H2
-      else if((j == 2016 && i < 7) || (j == 2015))
+      }
+      else if((tripYear == 2016 && tripMonth < 7) || (tripYear == 2015))
+      {
+        println("Schema: 2015+2016H1")
         taxiSchema = yellowTripSchema20152016H1
-      else if(j == 2017 && i < 7)
+      }
+      else if(tripYear == 2017 && tripMonth < 7){
         taxiSchema = yellowTripSchema2017H1
+        println("Schema: 2017")
     }
-  }
+
   taxiSchema
 }
 
@@ -163,52 +168,56 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
 
       if(tripYear > 2008 && tripYear < 2015)
       {
-        sourceDF.withColumn("pulocationid", lit(""))
-                  .withColumn("dolocationid", lit(""))
+        //println("Schema: 2008-15")
+        sourceDF.withColumn("pickup_location_id", lit(""))
+                  .withColumn("dropoff_location_id", lit(""))
                   .withColumn("improvement_surcharge",lit(""))
                   .withColumn("junk1",lit(""))
                   .withColumn("junk2",lit(""))
-                  .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
-                  .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
+                  .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                  .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("yellow"))
-
-      }
-      else if(tripYear == 2016 && tripMonth > 6)
-      {
-        sourceDF.withColumn("pulocationid", lit(""))
-                  .withColumn("dolocationid", lit(""))
-                  .withColumn("junk1",lit(""))
-                  .withColumn("junk2",lit(""))
-                  .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
-                  .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
-                  .withColumn("taxi_type",lit("yellow"))
-                  .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
 
       }
       else if((tripYear == 2016 && tripMonth < 7) || (tripYear == 2015))
       {
+        //println("Schema: 2015+2016H1")
+        sourceDF.withColumn("pickup_location_id", lit(""))
+                  .withColumn("dropoff_location_id", lit(""))
+                  .withColumn("junk1",lit(""))
+                  .withColumn("junk2",lit(""))
+                  .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                  .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
+                  .withColumn("taxi_type",lit("yellow"))
+                  .withColumn("temp_vendor_id", col("vendor_id").cast(StringType)).drop("vendor_id").withColumnRenamed("temp_vendor_id", "vendor_id")
+
+      }
+      else if(tripYear == 2016 && tripMonth > 6)
+      {
+        //println("Schema: 2016H2")
         sourceDF.withColumn("pickup_longitude", lit(""))
                   .withColumn("pickup_latitude", lit(""))
                   .withColumn("dropoff_longitude", lit(""))
                   .withColumn("dropoff_latitude", lit(""))
-                  .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
-                  .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
+                  .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                  .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("yellow"))
-                  .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
+                  .withColumn("temp_vendor_id", col("vendor_id").cast(StringType)).drop("vendor_id").withColumnRenamed("temp_vendor_id", "vendor_id")
 
       }
       else if(tripYear == 2017 && tripMonth < 7)
       {
+        //println("Schema: 2017")
         sourceDF.withColumn("pickup_longitude", lit(""))
                   .withColumn("pickup_latitude", lit(""))
                   .withColumn("dropoff_longitude", lit(""))
                   .withColumn("dropoff_latitude", lit(""))
-                  .withColumn("trip_year",substring(col("tpep_pickup_datetime"),0, 4))
-                  .withColumn("trip_month",substring(col("tpep_pickup_datetime"),6,2))
+                  .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
+                  .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("yellow"))
                   .withColumn("junk1",lit(""))
                   .withColumn("junk2",lit(""))
-                  .withColumn("vendorid2", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("vendorid2", "vendorid")
+                  .withColumn("vendorid2", col("vendor_id").cast(StringType)).drop("vendor_id").withColumnRenamed("vendorid2", "vendor_id")
 
       }
   else
@@ -219,11 +228,7 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
 
 //Canonical ordered column list for yellow taxi across years to homogenize schema
 //These are actual columns names in the header of source data as is
-val canonicalTripSchemaColList = Seq("vendorid","tpep_pickup_datetime","tpep_dropoff_datetime","store_and_fwd_flag","ratecodeid","pulocationid","dolocationid",
-                                       "pickup_longitude","pickup_latitude","dropoff_longitude","dropoff_latitude","passenger_count",
-                                       "trip_distance","fare_amount","extra","mta_tax","tip_amount","tolls_amount",
-                                       "improvement_surcharge","total_amount","trip_year","trip_month","taxi_type"
-                                    )
+val canonicalTripSchemaColList = Seq("taxi_type","vendor_id","pickup_datetime","dropoff_datetime","store_and_fwd_flag","rate_code_id","pickup_location_id","dropoff_location_id","pickup_longitude","pickup_latitude","dropoff_longitude","dropoff_latitude","passenger_count","trip_distance","fare_amount","extra","mta_tax","tip_amount","tolls_amount","improvement_surcharge","total_amount","trip_year","trip_month")
 
 // COMMAND ----------
 
@@ -239,11 +244,12 @@ println(deleteDirStatus)
 //Add columns of interest
 //Save as parquet
 
+import spark.implicits._
+import spark.sql
 
-for (j <- 2017 to 2017)
+for (j <- 2016 to 2016)
   {
-    //Create destination partition - year
-    dbutils.fs.mkdirs(destDataDirRoot + "trip_year=" + j) 
+    val monthsCount = if (j==2017) 6 else 12 
     for (i <- 1 to 1) 
     {
       
@@ -252,39 +258,73 @@ for (j <- 2017 to 2017)
       //Source path  
       val srcDataFile= srcDataDirRoot + "year=" + j + "/month=" +  "%02d".format(i) + "/type=yellow/yellow_tripdata_" + j + "-" + "%02d".format(i) + ".csv"
       println(srcDataFile)
-      
+
+
       //Destination path  
       val destDataDir = destDataDirRoot + "/trip_year=" + j + "/trip_month=" + "%02d".format(i) + "/"
 
+      println("Determine schema")
+      
       //Source schema
       val taxiSchema = getTaxiSchema(j,i)
+      taxiSchema.printTreeString() 
 
-      //Read source datA
+      //Read source data
       val taxiDF = sqlContext.read.format("csv")
                       .option("header", "true")
                       .schema(taxiSchema)
                       .option("delimiter",",")
-                      .option("mode", "DROPMALFORMED")
                       .load(srcDataFile).cache()
       
+      //.option("mode", "DROPMALFORMED")
+      println("Read source")
+
       //Add additional columns to homogenize schema across years
       val taxiFormattedDF = getSchemaHomogenizedDataframe(taxiDF, j, i)
       
+      println("Homogenized")
+      taxiFormattedDF.printSchema
+      
+      println("Finished printing the schema")
+
       //Order all columns to align with the canonical schema for yellow taxi
       val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
-      
+
       println("Destination DF record count=" + taxiCanonicalDF.count)
+      
+      println("Post counting")
+      
+      //To make Hive Parquet format compatible with Spark Parquet format
+      spark.sqlContext.setConf("spark.sql.parquet.writeLegacyFormat", "true")
 
       //Write parquet output, calling function to calculate number of partition files
       taxiCanonicalDF.coalesce(calcOutputFileCount(srcDataFile)).write.parquet(destDataDir)
+      //taxiCanonicalDF.coalesce(calcOutputFileCount(srcDataFile)).write.format("csv").option("delimiter",",").save(destDataDir)
 
       //Delete residual files from job operation (_SUCCESS, _start*, _committed*)
       dbutils.fs.ls(destDataDir).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
+      
+      taxiCanonicalDF.printSchema
+      
+      //Add partition for year and month
+      sql("ALTER TABLE nyc_db.trips_yellow_raw_prq ADD IF NOT EXISTS PARTITION (trip_year=" + j + ",trip_month=" + "%02d".format(i) + ") LOCATION '" + destDataDir.dropRight(1) + "'")
+    
+      //Refresh table
+      sql("REFRESH TABLE nyc_db.trips_yellow_raw_prq")
     }
   }
+sql("ANALYZE TABLE nyc_db.trips_yellow_raw_prq COMPUTE STATISTICS")
+
 
 // COMMAND ----------
 
+//Check if file exists - Test
+val exists = fs.exists(new Path("/mnt/data/nyctaxi/source/year=2016/month=01/type=yellow/"))
+
+
+// COMMAND ----------
+
+/*
 val taxiDF = sqlContext.read.format("csv")
                       .option("header", "true")
                       .option("inferSchema", "true")
@@ -296,41 +336,11 @@ val taxiDF = sqlContext.read.format("csv")
 
 taxiDF.printSchema
 taxiDF.head()
+*/
 
 // COMMAND ----------
 
-dbutils.fs.head("/mnt/data/nyctaxi/source/year=2009/month=01/type=yellow/yellow_tripdata_2009-01.csv")
-
-// COMMAND ----------
-
-//Clean up for rerun
-for (j <- 2017 to 2017)
-  {
-    for (i <- 1 to 6) 
-    {
-      
-      println("Year=" + j + "; Month=" + i)
-      println("====================================================================================")
-      println("...1.  Deleting files")
-      
-      val dataDir=destDataDirRoot + "trip_year=" + j + "/trip_month=" +  "%02d".format(i) + "/"
-      println("dataDir=" + dataDir)
-
-      dbutils.fs.ls(dataDir).foreach((i: FileInfo) => {
-        val filename = i.path  
-        val delStatus = dbutils.fs.rm(filename)
-        println("........Status of deletion of " + filename + " = " + delStatus)
-      })
-      
-      println("...2.  Deleting directory")
-      dbutils.fs.rm(dataDir)
-      println("====================================================================================")
-    }
-}
-
-// COMMAND ----------
-
-
+dbutils.fs.head("/mnt/data/nyctaxi/source/year=2016/month=01/type=yellow/yellow_tripdata_2016-01.csv")
 
 // COMMAND ----------
 
