@@ -100,7 +100,7 @@ val yellowTripSchemaPre2015 = StructType(Array(
 
 val fs = FileSystem.get(new Configuration())
 val srcDataDirRoot = "/mnt/data/nyctaxi/source/" //Root dir for source data
-val destDataDirRoot = "/mnt/data/nyctaxi/raw/" //Root dir for formatted data
+val destDataDirRoot = "/mnt/data/nyctaxi/raw/yellow-taxi" //Root dir for formatted data
 val targetedFileSizeMB = 64 //Dont want very small files - we want to keep each part file at least 64 MB
 val parquetSpaceSaving = 0.19 //We found a saving in space of 19% with Parquet
 
@@ -228,7 +228,7 @@ val canonicalTripSchemaColList = Seq("vendorid","tpep_pickup_datetime","tpep_dro
 // COMMAND ----------
 
 //Delete any residual data from prior executions for an idempotent run
-val dataDir=destDataDirRoot + "/trip_year=2009"
+val dataDir=destDataDirRoot 
 val deleteDirStatus = dbutils.fs.rm(dataDir,recurse=true)
 println(deleteDirStatus)
 
@@ -239,11 +239,12 @@ println(deleteDirStatus)
 //Add columns of interest
 //Save as parquet
 
+
 for (j <- 2017 to 2017)
   {
     //Create destination partition - year
     dbutils.fs.mkdirs(destDataDirRoot + "trip_year=" + j) 
-    for (i <- 1 to 12) 
+    for (i <- 1 to 1) 
     {
       
       println("Year=" + j + "; Month=" + i)
@@ -253,24 +254,26 @@ for (j <- 2017 to 2017)
       println(srcDataFile)
       
       //Destination path  
-      val destDataDir = destDataDirRoot + "/trip_year=" + j + "/trip_month=" + "%02d".format(i) + "/taxi_type=yellow"
+      val destDataDir = destDataDirRoot + "/trip_year=" + j + "/trip_month=" + "%02d".format(i) + "/"
 
       //Source schema
       val taxiSchema = getTaxiSchema(j,i)
 
-      //Read source data
+      //Read source datA
       val taxiDF = sqlContext.read.format("csv")
                       .option("header", "true")
                       .schema(taxiSchema)
                       .option("delimiter",",")
                       .option("mode", "DROPMALFORMED")
                       .load(srcDataFile).cache()
-
+      
       //Add additional columns to homogenize schema across years
       val taxiFormattedDF = getSchemaHomogenizedDataframe(taxiDF, j, i)
       
       //Order all columns to align with the canonical schema for yellow taxi
       val taxiCanonicalDF = taxiFormattedDF.select(canonicalTripSchemaColList.map(c => col(c)): _*)
+      
+      println("Destination DF record count=" + taxiCanonicalDF.count)
 
       //Write parquet output, calling function to calculate number of partition files
       taxiCanonicalDF.coalesce(calcOutputFileCount(srcDataFile)).write.parquet(destDataDir)
