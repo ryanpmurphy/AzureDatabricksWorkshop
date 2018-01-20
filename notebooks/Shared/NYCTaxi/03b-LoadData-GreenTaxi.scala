@@ -169,7 +169,7 @@ val getTaxiSchema  = (tripYear: Int, tripMonth: Int) => {
 
       if(tripYear > 2008 && tripYear < 2015)
         taxiSchema = greenTripSchemaPre2015
-      else if(tripYear) == 2015 && tripMonth < 7)
+      else if(tripYear == 2015 && tripMonth < 7)
         taxiSchema = greenTripSchema2015H1
       else if((tripYear == 2015 && tripMonth > 6) || (tripYear == 2016 && tripMonth < 7))
         taxiSchema = greenTripSchema2015H22016H1
