@@ -31,6 +31,7 @@
 // MAGIC tolls_amount DOUBLE,
 // MAGIC improvement_surcharge DOUBLE,
 // MAGIC total_amount DOUBLE,
+// MAGIC payment_type INT,
 // MAGIC trip_year STRING,
 // MAGIC trip_month STRING)
 // MAGIC USING parquet
