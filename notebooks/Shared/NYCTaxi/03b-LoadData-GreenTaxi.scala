@@ -238,6 +238,14 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                   .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                   .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("green"))
+                  .withColumn("temp_pickup_longitude", col("pickup_longitude").cast(StringType))
+                                          .drop("pickup_longitude").withColumnRenamed("temp_pickup_longitude", "pickup_longitude")
+                  .withColumn("temp_dropoff_longitude", col("dropoff_longitude").cast(StringType))
+                                          .drop("dropoff_longitude").withColumnRenamed("temp_dropoff_longitude", "dropoff_longitude")
+                  .withColumn("temp_pickup_latitude", col("pickup_latitude").cast(StringType))
+                                          .drop("pickup_latitude").withColumnRenamed("temp_pickup_latitude", "pickup_latitude")
+                  .withColumn("temp_dropoff_latitude", col("dropoff_latitude").cast(StringType))
+                                          .drop("dropoff_latitude").withColumnRenamed("temp_dropoff_latitude", "dropoff_latitude")
       }
       else if(tripYear == 2016 && tripMonth > 6)
       {
