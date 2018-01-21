@@ -112,6 +112,59 @@
 // MAGIC %sql
 // MAGIC use nyc_db;
 // MAGIC 
+// MAGIC DROP TABLE IF EXISTS refdata_rate_code_lookup;
+// MAGIC 
+// MAGIC CREATE TABLE IF NOT EXISTS refdata_rate_code_lookup(
+// MAGIC ratecodeid INT,
+// MAGIC description STRING)
+// MAGIC USING parquet
+// MAGIC LOCATION 'wasbs://refdata@gaiasa.blob.core.windows.net/rate-code/';
+
+// COMMAND ----------
+
+// MAGIC %sql
+// MAGIC use nyc_db;
+// MAGIC 
+// MAGIC DROP TABLE IF EXISTS refdata_payment_type_lookup;
+// MAGIC 
+// MAGIC CREATE TABLE IF NOT EXISTS refdata_payment_type_lookup(
+// MAGIC payment_type INT,
+// MAGIC description STRING)
+// MAGIC USING parquet
+// MAGIC LOCATION 'wasbs://refdata@gaiasa.blob.core.windows.net/payment-type/';
+
+// COMMAND ----------
+
+// MAGIC %sql
+// MAGIC use nyc_db;
+// MAGIC 
+// MAGIC DROP TABLE IF EXISTS refdata_trip_type_lookup;
+// MAGIC 
+// MAGIC CREATE TABLE IF NOT EXISTS refdata_trip_type_lookup(
+// MAGIC trip_type INT,
+// MAGIC description STRING)
+// MAGIC USING parquet
+// MAGIC LOCATION 'wasbs://refdata@gaiasa.blob.core.windows.net/trip-type/';
+
+// COMMAND ----------
+
+// MAGIC %sql
+// MAGIC use nyc_db;
+// MAGIC 
+// MAGIC DROP TABLE IF EXISTS refdata_vendor_lookup;
+// MAGIC 
+// MAGIC CREATE TABLE IF NOT EXISTS refdata_vendor_lookup(
+// MAGIC vendorid INT,
+// MAGIC abbreviation STRING,
+// MAGIC description STRING)
+// MAGIC USING parquet
+// MAGIC LOCATION 'wasbs://refdata@gaiasa.blob.core.windows.net/vendor/';
+
+// COMMAND ----------
+
+// MAGIC %sql
+// MAGIC use nyc_db;
+// MAGIC 
 // MAGIC --msck repair table trips_yellow_raw_prq
 // MAGIC --show partitions trips_yellow_raw_prq 
 // MAGIC --alter table trips_yellow_raw_prq add if not exists partition (trip_year=2016,trip_month=01) LOCATION 'wasbs://raw@gaiasa.blob.core.windows.net/yellow-taxi/trip_year=2016/trip_month=01';
