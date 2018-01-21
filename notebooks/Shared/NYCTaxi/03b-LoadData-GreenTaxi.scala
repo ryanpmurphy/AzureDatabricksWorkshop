@@ -204,7 +204,6 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                   .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                   .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("green"))
-                  .withColumn("temp_vendorid", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("temp_vendorid", "vendorid")
                   .withColumn("temp_pickup_longitude", col("pickup_longitude").cast(StringType))
                                           .drop("pickup_longitude").withColumnRenamed("temp_pickup_longitude", "pickup_longitude")
                   .withColumn("temp_dropoff_longitude", col("dropoff_longitude").cast(StringType))
@@ -221,7 +220,6 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                   .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                   .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("green"))
-                  .withColumn("temp_vendorid", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("temp_vendorid", "vendorid")
                   .withColumn("temp_pickup_longitude", col("pickup_longitude").cast(StringType))
                                           .drop("pickup_longitude").withColumnRenamed("temp_pickup_longitude", "pickup_longitude")
                   .withColumn("temp_dropoff_longitude", col("dropoff_longitude").cast(StringType))
@@ -240,7 +238,6 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                   .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                   .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("green"))
-                  .withColumn("temp_vendorid", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("temp_vendorid", "vendorid")
       }
       else if(tripYear == 2016 && tripMonth > 6)
       {
@@ -251,7 +248,6 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                   .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                   .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("green"))
-                  .withColumn("temp_vendorid", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("temp_vendorid", "vendorid")
       }
       else if(tripYear == 2017 && tripMonth < 7)
       {
@@ -264,7 +260,6 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                   .withColumn("taxi_type",lit("green"))
                   .withColumn("junk1",lit(""))
                   .withColumn("junk2",lit(""))
-                  .withColumn("temp_vendorid", col("vendorid").cast(StringType)).drop("vendorid").withColumnRenamed("temp_vendorid", "vendorid")
       }
   else
     sourceDF
@@ -317,7 +312,6 @@ for (j <- 2014 to 2017)
                       .schema(taxiSchema)
                       .option("delimiter",",")
                       .load(srcDataFile).cache()
-      
 
       //Add additional columns to homogenize schema across years
       val taxiFormattedDF = getSchemaHomogenizedDataframe(taxiDF, j, i)
