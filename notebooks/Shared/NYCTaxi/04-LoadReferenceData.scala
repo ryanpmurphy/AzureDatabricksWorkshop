@@ -163,15 +163,11 @@ val srcSchema = rateCodeSchema
 //Read source data
 val refDF = sqlContext.read.option("header", "true")
                       .schema(srcSchema)
-                      .option("delimiter",",")
+                      .option("delimiter","|")
                       .csv(srcDataFile)
-      
-//Remove double quotes
-val refFormattedDF = refDF.select($"ratecodeid",
-                                  translate($"description","\"","").as("description"))
 
 //Write parquet output
-refFormattedDF.coalesce(1).write.parquet(destDataDir)
+refDF.coalesce(1).write.parquet(destDataDir)
 
 println("Saved data")
 
@@ -204,15 +200,11 @@ val srcSchema = paymentTypeSchema
 //Read source data
 val refDF = sqlContext.read.option("header", "true")
                       .schema(srcSchema)
-                      .option("delimiter",",")
+                      .option("delimiter","|")
                       .csv(srcDataFile)
-      
-//Remove double quotes
-val refFormattedDF = refDF.select($"payment_type",
-                                  translate($"description","\"","").as("description"))
 
 //Write parquet output
-refFormattedDF.coalesce(1).write.parquet(destDataDir)
+refDF.coalesce(1).write.parquet(destDataDir)
 
 println("Saved data")
 
@@ -245,15 +237,11 @@ val srcSchema = tripTypeSchema
 //Read source data
 val refDF = sqlContext.read.option("header", "true")
                       .schema(srcSchema)
-                      .option("delimiter",",")
+                      .option("delimiter","|")
                       .csv(srcDataFile)
-      
-//Remove double quotes
-val refFormattedDF = refDF.select($"trip_type",
-                                  translate($"description","\"","").as("description"))
 
 //Write parquet output
-refFormattedDF.coalesce(1).write.parquet(destDataDir)
+refDF.coalesce(1).write.parquet(destDataDir)
 
 println("Saved data")
 
@@ -286,16 +274,11 @@ val srcSchema = vendorSchema
 //Read source data
 val refDF = sqlContext.read.option("header", "true")
                       .schema(srcSchema)
-                      .option("delimiter",",")
+                      .option("delimiter","|")
                       .csv(srcDataFile)
 
-//Remove double quotes
-val refFormattedDF = refDF.select($"vendorid",
-                                  translate($"abbreviation","\"","").as("abbreviation"),
-                                  translate($"description","\"","").as("description"))
-
 //Write parquet output
-refFormattedDF.coalesce(1).write.parquet(destDataDir)
+refDF.coalesce(1).write.parquet(destDataDir)
 
 //Delete residual files from job operation (_SUCCESS, _start*, _committed*)
 dbutils.fs.ls(destDataDir + "/").foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
@@ -306,7 +289,7 @@ sql("REFRESH TABLE nyc_db.refdata_vendor_lookup")
 // COMMAND ----------
 
 // MAGIC %sql
-// MAGIC select * from nyc_db.refdata_rate_code_lookup;
+// MAGIC select * from nyc_db.refdata_trip_type_lookup;
 
 // COMMAND ----------
 
