@@ -1,17 +1,29 @@
 // Databricks notebook source
-//1. Join with lookup tables
-//2. Add additional columns line hour minute time that is currently only part of date
+import spark.implicits._
+import spark.sql
+import com.databricks.backend.daemon.dbutils.FileInfo
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{ FileSystem, Path }
 
 // COMMAND ----------
 
-dbutils.fs.rm("/mnt/data/nyctaxi/transformed/green-taxi/",recurse=true)
+val fs = FileSystem.get(new Configuration())
+val destDataDirRoot = "/mnt/data/nyctaxi/transformed/green-taxi" //Root dir for transformed data
 
 // COMMAND ----------
 
-sql("REFRESH TABLE nyc_db.trips_green_raw_prq")
+//Delete any residual data from prior executions for an idempotent run
+val dataDir=destDataDirRoot
+val deleteDirStatus = dbutils.fs.rm(dataDir,recurse=true)
+println(deleteDirStatus)
 
 // COMMAND ----------
 
+//Read raw data from database tables
+//save as parquet
+
+//Read raw data
+//Join raw trips to reference data tables, and add time element columns
 val sqlDF = spark.sql("""
   select t.taxi_type,
       t.vendorid,
@@ -67,17 +79,37 @@ val sqlDF = spark.sql("""
       second(t.dropoff_datetime) as dropoff_second,
       date(t.dropoff_datetime) as dropoff_date
   from nyc_db.trips_green_raw_prq t
-  join nyc_db.refdata_vendor_lookup v on t.vendorid = v.vendorid
-  join nyc_db.refdata_trip_type_lookup tt on t.trip_type = tt.trip_type
-  join nyc_db.refdata_trip_month_lookup tm on t.trip_month = tm.trip_month
-  join nyc_db.refdata_payment_type_lookup pt on t.payment_type = pt.payment_type
+  left join nyc_db.refdata_vendor_lookup v on t.vendorid = v.vendorid
+  left join nyc_db.refdata_trip_type_lookup tt on t.trip_type = tt.trip_type
+  left join nyc_db.refdata_trip_month_lookup tm on t.trip_month = tm.trip_month
+  left join nyc_db.refdata_payment_type_lookup pt on t.payment_type = pt.payment_type
   left join nyc_db.refdata_rate_code_lookup rc on t.ratecodeid = rc.ratecodeid
   left join nyc_db.refdata_taxi_zone_lookup tzpu on t.pickup_location_id = tzpu.location_id
   left join nyc_db.refdata_taxi_zone_lookup tzdo on t.dropoff_location_id = tzdo.location_id
   """)
-//sqlDF.show()
 
-sqlDF.write.partitionBy("trip_year", "trip_month").parquet("/mnt/data/nyctaxi/transformed/green-taxi/")
+//Write parquet output, calling function to calculate number of partition files
+sqlDF.write.partitionBy("trip_year", "trip_month").parquet(destDataDirRoot)
+
+//Delete residual files from job operation (_SUCCESS, _start*, _committed*)
+//dbutils.fs.ls(destDataDirRoot).foreach((i: FileInfo) => if (!(i.path contains "parquet")) dbutils.fs.rm(i.path))
+
+
+// //Refresh table
+// sql("REFRESH TABLE nyc_db.trips_green_raw_prq")
+
+// sql("ANALYZE TABLE nyc_db.trips_green_raw_prq COMPUTE STATISTICS")
+
+
+// COMMAND ----------
+
+//Check if file exists - Test
+//val exists = fs.exists(new Path("/mnt/data/nyctaxi/source/year=2016/month=01/type=green/"))
+
+
+// COMMAND ----------
+
+//dbutils.fs.head("/mnt/data/nyctaxi/source/year=2016/month=01/type=green/green_tripdata_2016-01.csv")
 
 // COMMAND ----------
 
