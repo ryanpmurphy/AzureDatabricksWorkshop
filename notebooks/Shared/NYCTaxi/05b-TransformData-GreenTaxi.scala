@@ -131,9 +131,6 @@ allFiles(destDataDirRoot).foreach((path) => {
 
 //Add partitions to transformed table
 
-import spark.implicits._
-import spark.sql
-
 for (j <- 2014 to 2017)
   {
     val monthsCount = if (j==2017) 6 else 12 
