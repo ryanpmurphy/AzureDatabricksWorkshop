@@ -33,13 +33,14 @@ val monthNameSchema = StructType(Array(
 //3.  Rate code id lookup
 //Applicable for: yellow taxi, greentaxi?
 val rateCodeSchema = StructType(Array(
-    StructField("ratecodeid", IntegerType, true),
+    StructField("rate_code_id", IntegerType, true),
     StructField("description", StringType, true)))
 
 //4.  Payment type lookup
 //Applicable for: yellow taxi, green taxi
 val paymentTypeSchema = StructType(Array(
     StructField("payment_type", IntegerType, true),
+    StructField("abbreviation", StringType, true),
     StructField("description", StringType, true)))
 
 //5. Trip type
@@ -52,7 +53,7 @@ val tripTypeSchema = StructType(Array(
 //6. Vendor ID
 //Applicable for: yellow taxi?, green taxi?
 val vendorSchema = StructType(Array(
-    StructField("vendorid", IntegerType, true),
+    StructField("vendor_id", IntegerType, true),
     StructField("abbreviation", StringType, true),
     StructField("description", StringType, true)))
 
@@ -289,7 +290,7 @@ sql("REFRESH TABLE nyc_db.refdata_vendor_lookup")
 // COMMAND ----------
 
 // MAGIC %sql
-// MAGIC select * from nyc_db.refdata_trip_type_lookup;
+// MAGIC select * from nyc_db.refdata_payment_type_lookup;
 
 // COMMAND ----------
 
