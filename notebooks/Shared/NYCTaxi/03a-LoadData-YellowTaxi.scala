@@ -22,7 +22,7 @@ val yellowTripSchema2017H1 = StructType(Array(
     StructField("store_and_fwd_flag", StringType, true),
     StructField("pickup_location_id", IntegerType, true),
     StructField("dropoff_location_id", IntegerType, true),
-    StructField("payment_type", IntegerType, true),
+    StructField("payment_type", StringType, true),
     StructField("fare_amount", DoubleType, true),
     StructField("extra", DoubleType, true),
     StructField("mta_tax", DoubleType, true),
@@ -42,7 +42,7 @@ val yellowTripSchema2016H2 = StructType(Array(
     StructField("store_and_fwd_flag", StringType, true),
     StructField("pickup_location_id", IntegerType, true),
     StructField("dropoff_location_id", IntegerType, true),
-    StructField("payment_type", IntegerType, true),
+    StructField("payment_type", StringType, true),
     StructField("fare_amount", DoubleType, true),
     StructField("extra", DoubleType, true),
     StructField("mta_tax", DoubleType, true),
@@ -66,7 +66,7 @@ val yellowTripSchema20152016H1 = StructType(Array(
     StructField("store_and_fwd_flag", StringType, true),
     StructField("dropoff_longitude", DoubleType, true),
     StructField("dropoff_latitude", DoubleType, true),
-    StructField("payment_type", IntegerType, true),
+    StructField("payment_type", StringType, true),
     StructField("fare_amount", DoubleType, true),
     StructField("extra", DoubleType, true),
     StructField("mta_tax", DoubleType, true),
@@ -175,7 +175,7 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                                           .drop("pickup_latitude").withColumnRenamed("temp_pickup_latitude", "pickup_latitude")
                   .withColumn("temp_dropoff_latitude", col("dropoff_latitude").cast(StringType))
                                           .drop("dropoff_latitude").withColumnRenamed("temp_dropoff_latitude", "dropoff_latitude")
-
+                  .withColumn("temp_payment_type", col("payment_type").cast(StringType)).drop("payment_type").withColumnRenamed("temp_payment_type", "payment_type")
       }
       else if((tripYear == 2016 && tripMonth < 7) || (tripYear == 2015))
       {
@@ -195,6 +195,7 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                                           .drop("pickup_latitude").withColumnRenamed("temp_pickup_latitude", "pickup_latitude")
                   .withColumn("temp_dropoff_latitude", col("dropoff_latitude").cast(StringType))
                                           .drop("dropoff_latitude").withColumnRenamed("temp_dropoff_latitude", "dropoff_latitude")
+                  .withColumn("temp_payment_type", col("payment_type").cast(StringType)).drop("payment_type").withColumnRenamed("temp_payment_type", "payment_type")
       }
       else if(tripYear == 2016 && tripMonth > 6)
       {
@@ -206,6 +207,7 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                   .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("yellow"))
                   .withColumn("temp_vendor_id", col("vendor_id").cast(StringType)).drop("vendor_id").withColumnRenamed("temp_vendor_id", "vendor_id")
+                  .withColumn("temp_payment_type", col("payment_type").cast(StringType)).drop("payment_type").withColumnRenamed("temp_payment_type", "payment_type")
       }
       else if(tripYear == 2017 && tripMonth < 7)
       {
@@ -218,7 +220,8 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
                   .withColumn("taxi_type",lit("yellow"))
                   .withColumn("junk1",lit(""))
                   .withColumn("junk2",lit(""))
-                  .withColumn("vendorid2", col("vendor_id").cast(StringType)).drop("vendor_id").withColumnRenamed("vendorid2", "vendor_id")
+                  .withColumn("temp_vendor_id", col("vendor_id").cast(StringType)).drop("vendor_id").withColumnRenamed("temp_vendor_id", "vendor_id")
+                  .withColumn("temp_payment_type", col("payment_type").cast(StringType)).drop("payment_type").withColumnRenamed("temp_payment_type", "payment_type")
       }
   else
     sourceDF
@@ -227,7 +230,6 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
 // COMMAND ----------
 
 //Canonical ordered column list for yellow taxi across years to homogenize schema
-//These are actual columns names in the header of source data as is
 val canonicalTripSchemaColList = Seq("taxi_type","vendor_id","pickup_datetime","dropoff_datetime","store_and_fwd_flag","rate_code_id","pickup_location_id","dropoff_location_id","pickup_longitude","pickup_latitude","dropoff_longitude","dropoff_latitude","passenger_count","trip_distance","fare_amount","extra","mta_tax","tip_amount","tolls_amount","improvement_surcharge","total_amount","payment_type","trip_year","trip_month")
 
 // COMMAND ----------
