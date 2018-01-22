@@ -13,13 +13,13 @@ import org.apache.spark.sql.DataFrame
 
 //2017
 val greenTripSchema2017H1 = StructType(Array(
-    StructField("vendorid", IntegerType, true),
+    StructField("vendor_id", IntegerType, true),
     StructField("pickup_datetime", TimestampType, true),
     StructField("dropoff_datetime", TimestampType, true),
     StructField("store_and_fwd_flag", StringType, true),
-    StructField("ratecodeid", IntegerType, true),
-    StructField("pulocationid", IntegerType, true),
-    StructField("dolocationid", IntegerType, true),
+    StructField("rate_code_id", IntegerType, true),
+    StructField("pickup_location_id", IntegerType, true),
+    StructField("dropoff_location_id", IntegerType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
     StructField("fare_amount", DoubleType, true),
@@ -35,13 +35,13 @@ val greenTripSchema2017H1 = StructType(Array(
 
 //Second half of 2016
 val greenTripSchema2016H2 = StructType(Array(
-    StructField("vendorid", IntegerType, true),
+    StructField("vendor_id", IntegerType, true),
     StructField("pickup_datetime", TimestampType, true),
     StructField("dropoff_datetime", TimestampType, true),
     StructField("store_and_fwd_flag", StringType, true),
-    StructField("ratecodeid", IntegerType, true),
-    StructField("pulocationid", IntegerType, true),
-    StructField("dolocationid", IntegerType, true),
+    StructField("rate_code_id", IntegerType, true),
+    StructField("pickup_location_id", IntegerType, true),
+    StructField("dropoff_location_id", IntegerType, true),
     StructField("passenger_count", IntegerType, true),
     StructField("trip_distance", DoubleType, true),
     StructField("fare_amount", DoubleType, true),
@@ -59,11 +59,11 @@ val greenTripSchema2016H2 = StructType(Array(
 
 //2015 second half of the year and 2016 first half of the year
 val greenTripSchema2015H22016H1 = StructType(Array(
-    StructField("vendorid", IntegerType, true),
+    StructField("vendor_id", IntegerType, true),
     StructField("pickup_datetime", TimestampType, true),
     StructField("dropoff_datetime", TimestampType, true),
     StructField("store_and_fwd_flag", StringType, true),
-    StructField("ratecodeid", IntegerType, true),
+    StructField("rate_code_id", IntegerType, true),
     StructField("pickup_longitude", DoubleType, true),
     StructField("pickup_latitude", DoubleType, true),
     StructField("dropoff_longitude", DoubleType, true),
@@ -83,11 +83,11 @@ val greenTripSchema2015H22016H1 = StructType(Array(
 
 //2015 first half of the year
 val greenTripSchema2015H1 = StructType(Array(
-    StructField("vendorid", IntegerType, true),
+    StructField("vendor_id", IntegerType, true),
     StructField("pickup_datetime", TimestampType, true),
     StructField("dropoff_datetime", TimestampType, true),
     StructField("store_and_fwd_flag", StringType, true),
-    StructField("ratecodeid", IntegerType, true),
+    StructField("rate_code_id", IntegerType, true),
     StructField("pickup_longitude", DoubleType, true),
     StructField("pickup_latitude", DoubleType, true),
     StructField("dropoff_longitude", DoubleType, true),
@@ -109,11 +109,11 @@ val greenTripSchema2015H1 = StructType(Array(
 
 //August 2013 through 2014
 val greenTripSchemaPre2015 = StructType(Array(
-    StructField("vendorid", IntegerType, true),
+    StructField("vendor_id", IntegerType, true),
     StructField("pickup_datetime", TimestampType, true),
     StructField("dropoff_datetime", TimestampType, true),
     StructField("store_and_fwd_flag", StringType, true),
-    StructField("ratecodeid", IntegerType, true),
+    StructField("rate_code_id", IntegerType, true),
     StructField("pickup_longitude", DoubleType, true),
     StructField("pickup_latitude", DoubleType, true),
     StructField("dropoff_longitude", DoubleType, true),
@@ -198,8 +198,8 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
 
       if((tripYear == 2013 && tripMonth > 7) || tripYear == 2014)
       {
-        sourceDF.withColumn("pulocationid", lit(0).cast(IntegerType))
-                  .withColumn("dolocationid", lit(0).cast(IntegerType))
+        sourceDF.withColumn("pickup_location_id", lit(0).cast(IntegerType))
+                  .withColumn("dropoff_location_id", lit(0).cast(IntegerType))
                   .withColumn("improvement_surcharge",lit(0).cast(DoubleType))
                   .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                   .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
@@ -215,8 +215,8 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
       }
       else if(tripYear == 2015 && tripMonth < 7)
       {
-        sourceDF.withColumn("pulocationid", lit(0).cast(IntegerType))
-                  .withColumn("dolocationid", lit(0).cast(IntegerType))
+        sourceDF.withColumn("pickup_location_id", lit(0).cast(IntegerType))
+                  .withColumn("dropoff_location_id", lit(0).cast(IntegerType))
                   .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
                   .withColumn("trip_month",substring(col("pickup_datetime"),6,2))
                   .withColumn("taxi_type",lit("green"))
@@ -231,8 +231,8 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
       }
       else if((tripYear == 2015 && tripMonth > 6) || (tripYear == 2016 && tripMonth < 7))
       {
-        sourceDF.withColumn("pulocationid", lit(0).cast(IntegerType))
-                  .withColumn("dolocationid", lit(0).cast(IntegerType))
+        sourceDF.withColumn("pickup_location_id", lit(0).cast(IntegerType))
+                  .withColumn("dropoff_location_id", lit(0).cast(IntegerType))
                   .withColumn("junk1",lit(""))
                   .withColumn("junk2",lit(""))
                   .withColumn("trip_year",substring(col("pickup_datetime"),0, 4))
@@ -276,8 +276,7 @@ def getSchemaHomogenizedDataframe(sourceDF: org.apache.spark.sql.DataFrame,
 // COMMAND ----------
 
 //Canonical ordered column list for green taxi across years to homogenize schema
-//These are actual columns names in the header of source data as is
-val canonicalTripSchemaColList = Seq("taxi_type","vendorid","pickup_datetime","dropoff_datetime","store_and_fwd_flag","ratecodeid","pulocationid","dolocationid","pickup_longitude","pickup_latitude","dropoff_longitude","dropoff_latitude","passenger_count","trip_distance","fare_amount","extra","mta_tax","tip_amount","tolls_amount","ehail_fee","improvement_surcharge","total_amount","payment_type","trip_type","trip_year","trip_month")
+val canonicalTripSchemaColList = Seq("taxi_type","vendor_id","pickup_datetime","dropoff_datetime","store_and_fwd_flag","rate_code_id","pickup_location_id","dropoff_location_id","pickup_longitude","pickup_latitude","dropoff_longitude","dropoff_latitude","passenger_count","trip_distance","fare_amount","extra","mta_tax","tip_amount","tolls_amount","ehail_fee","improvement_surcharge","total_amount","payment_type","trip_type","trip_year","trip_month")
 
 // COMMAND ----------
 
